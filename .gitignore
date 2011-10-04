@@ -9,3 +9,6 @@
 # v 6.x
 *.komodoproject
 
+# Specific
+lib/MAL.pm
+
