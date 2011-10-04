@@ -5,6 +5,8 @@ use warnings;
 
 use Test::More tests => 3;
 
+use lib '../lib';
+
 use_ok( 'MAL' );
 
 my $parser = MAL -> new();
