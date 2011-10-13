@@ -22,6 +22,7 @@ use MAL;
 	my $i = 0;
 	while (<>) {
 		chomp;
+		goto PARSER if $_ eq 'quit';
 
 		# Remove line numbers:
 		s/^\s*\d+\s*:\s*//;
@@ -46,6 +47,8 @@ use MAL;
 		$i++;
 
 	}
+
+PARSER:
 
 	$parser -> setTags($tags);
 
