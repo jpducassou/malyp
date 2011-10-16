@@ -1,0 +1,30 @@
+The mic014.txt data file.  This is an incorrect Mic1 program that tries to
+do a write, but loads the mar and mbr in the second write cycle instead
+of the first, as it should.
+
+2 microinstructions:
+
+A   C
+M   O    A        M  M        E
+U   N    L    S   B  A  R  W  N     C        B        A          ADDR
+X   D    U    H   R  R  D  R  C
+
+0  0 0  1 0  0 0  0  0  0  1  0  0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0 0 0 0 0
+0  0 0  1 0  0 0  1  1  0  1  0  0 0 0 0  0 0 0 1  1 1 1 1  0 0 0 0 0 0 0 0
+
+0 Mac-1 instructions:
+
+0 data items for main memory:
+
+Register values:
+
+PC  AC  SP  IR  TIR  0  +1  -1  AMASK  SMASK  A  B  C  D  E  F
+
+0   40  69  0   0    0   1  -1  4095   255    0  0  0  0  0  5
+
+The MAL form of the above microinstructions follows:
+
+0:	wr;
+1:	mar := ac; mbr := f; wr;
+
+End of the mic014.txt data file.

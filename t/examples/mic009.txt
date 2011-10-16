@@ -1,0 +1,49 @@
+The mic009.txt data file.  This Mic-1 program illustrates a conditional
+jump and a write to memory.  More importantly, it shows how to compute
+the difference ac = e - d.  This file is the same as mic008.txt except
+that register e contains a different value, giving a different choice
+when deciding whether to do the jump.
+
+6 microinstructions:
+
+A   C
+M   O    A        M  M        E
+U   N    L    S   B  A  R  W  N     C        B        A          ADDR
+X   D    U    H   R  R  D  R  C
+
+0  0 0  1 1  0 0  0  0  0  0  1  0 0 0 1  0 0 0 0  1 1 0 1  0 0 0 0 0 0 0 0
+0  0 0  0 0  0 0  0  0  0  0  1  0 0 0 1  0 0 0 1  1 1 1 0  0 0 0 0 0 0 0 0
+0  0 1  0 0  0 0  0  0  0  0  1  0 0 0 1  0 0 0 1  0 1 1 0  0 0 0 0 0 1 0 0
+0  0 0  0 0  0 0  0  0  0  0  1  0 0 0 1  0 0 0 1  1 1 1 1  0 0 0 0 0 0 0 0
+0  0 0  1 0  0 0  1  1  0  1  0  0 0 0 0  1 0 1 0  0 0 0 1  0 0 0 0 0 0 0 0
+0  0 0  1 0  0 0  0  0  0  1  0  0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0 0 0 0 0
+
+0 Mac-1 instructions
+
+0 data items for main memory
+
+Register values:
+
+PC  AC  SP  IR  TIR  0  +1  -1  AMASK  SMASK  A   B  C  D  E   F
+
+0   0   69  0   0    0   1  -1  4095   255    42  0  0  8  12  6
+
+The MAL form of the above microinstructions follows:
+
+0:	ac := inv(d);                       (inverse is 1's complement, boolean not)
+1:	ac := ac + e;
+2:	ac := ac + 1; if n then goto 4;     (n means N Flag of 1 set by ALU output)
+3:	ac := ac + f;
+4:	mar := a; mbr := ac; wr;
+5:	wr;
+
+Note that we have computed the desired difference as follows:
+	ac = e - d = e + inv(d) + 1
+since in 2's complement arithmetic subtracting something is done by adding the 1's
+complement (boolean not) and then adding 1.
+
+The simulator loads registers a, d, e, and f as shown above.  The value in a is the
+location to write the answer to.  Since e - d = 12 - 8 = 4, the conditional jump
+should NOT be done, so that line 3 is executed.
+
+End of the mic009.txt data file.
