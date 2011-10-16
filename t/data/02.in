@@ -1,0 +1,4 @@
+0:	mar := f; rd;
+1:	rd;
+2:	ac := inv(mbr);   (inv, short for inverse, is used to indicate a boolean not)
+3:	ac := rshift(ac);

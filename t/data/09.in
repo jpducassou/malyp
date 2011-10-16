@@ -1,0 +1,6 @@
+0:	ac := inv(d);
+1:	ac := ac + e;
+2:	ac := ac + 1; if n then goto 4;
+3:	ac := ac + f;
+4:	mar := a; mbr := ac; wr;
+5:	wr;

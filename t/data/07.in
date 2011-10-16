@@ -1,0 +1,4 @@
+0:	mar := a; rd;
+1:	rd;
+2:	ac := mbr;
+3:	ac := ac + ac;

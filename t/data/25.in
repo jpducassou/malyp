@@ -1,0 +1,10 @@
+0:	mar := a; rd;
+1:	rd;
+2:	c := mbr; mar := b; rd;
+3:	rd;
+4:	d := mbr;
+5:	d := d + (-1); if n then goto 7;
+6:	c := rshift(c); goto 5;
+7:      sp := sp + (-1);
+8:	mar := sp; mbr := c; wr;
+9:	wr;

@@ -1,0 +1,2 @@
+0:	wr;
+1:	mar := ac; mbr := f; wr;
