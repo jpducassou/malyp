@@ -45,7 +45,7 @@ use constant {
 	_ERR_BRACKET_NOT_FOUND		=> 'Seguramente falta parentesis derecho',
 	_ERR_UNRECOGNISED_EXPRESION	=> 'No se roconoce la expresion : _ERROR_',
 	_ERR_UNRECOGNISED_OPERATOR	=> 'No se roconoce el operador: _ERROR_',
-	_ERR_WRONG_SINTAX	=> 'Ud. tiene un error de sintaxis cerca de: _ERROR_',
+	_ERR_WRONG_SYNTAX	=> 'Ud. tiene un error de sintaxis cerca de: _ERROR_',
 	_ERR_TOKEN_EXPECTED	=> 'Se esperaba: _ERROR_',
 	_ERR_TAG_NOT_FOUND	=> 'No se encontro el tag: _ERROR_',
 };
@@ -186,26 +186,26 @@ sub run {
     # debug => 0x1F
 }
 
-sub setTags {
+sub set_tags {
 	my $self = shift;
 
 	$tags = shift;
 
 }
 
-sub getTag {
+sub get_tag {
 		my $tag = shift;
 
 		# return  (exists $tags -> {$tag}) ? $tags -> {$tag} : 0;
 		if (exists $tags -> {$tag}) {
 			return $tags -> {$tag};
 		} else {
-			addError(_ERR_TAG_NOT_FOUND, $tag);
+			_add_error(_ERR_TAG_NOT_FOUND, $tag);
 			return 0;
 		}
 }
 
-sub addError {
+sub _add_error {
 		my $msg = shift;
 
 		while (my $val = shift) {
@@ -217,15 +217,9 @@ sub addError {
     unshift @errors, $msg;
 }
 
-sub getErrors {
+sub get_errors {
     my $self = shift;
     return \@errors;
-}
-
-sub dbg {
-		# Funcion para debuggear:
-		my $msg = shift;
-		warn "[WARNING] : SAYS: ". $msg if (DEBUG)
 }
 
 # ==============================================================================
@@ -300,7 +294,7 @@ sub _lexer {
 		# Si no reconozco un token y todavia hay tira por leer
 		# hay un error en la expresion
 		my $input = $parser -> YYData -> {INPUT};
-		if ($input) { addError( _ERR_UNRECOGNISED_EXPRESION, $input); }
+		if ($input) { _add_error( _ERR_UNRECOGNISED_EXPRESION, $input); }
 
 		# Segun lo especificado en la ayuda Parse::Yacc
 		# al terminar se debe retornar ('', undef)
@@ -322,13 +316,13 @@ sub _error {
 		# lista de los tokens que se esperaban
 		my $expected = join("' o '", grep(!/error/, $parser -> YYExpect));
 
-		addError( _ERR_WRONG_SINTAX, ($input || 'fin de expresion') );
-		addError( _ERR_TOKEN_EXPECTED, $expected );
+		_add_error( _ERR_WRONG_SYNTAX, ($input || 'fin de expresion') );
+		_add_error( _ERR_TOKEN_EXPECTED, $expected );
 
    	exists $parser -> YYData -> {ERRMSG} &&
 		do {
 				my $descerr = $parser -> YYData -> {ERRMSG};
-				addError($descerr);
+				_add_error($descerr);
 				delete $parser -> YYData -> {ERRMSG};
 				return;
 		};

@@ -52,7 +52,7 @@ sub run() {
 
 PARSER:
 
-	$parser -> setTags($tags);
+	$parser -> set_tags($tags);
 
 	$i = 1;
 	foreach my $line (@lines) {
@@ -61,7 +61,7 @@ PARSER:
 		next() unless $sent;
 
 		# Errores
-		my $errores_parser = $parser -> getErrors();
+		my $errores_parser = $parser -> get_errors();
 
 		if (@$errores_parser) {
 			print "Error en la linea $i: ";
