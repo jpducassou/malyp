@@ -156,6 +156,43 @@ sent_jmp:
 %%
 
 # ==============================================================================
+
+sub run {
+
+		my $self = shift;
+		my $data = shift;
+
+		$self -> YYData -> {INPUT} = $data;
+
+		# Reset errors from previous runs:
+		$ERRORCNT = 0;	# Numero total de errores
+		@errors = ();
+
+		# Do the job:
+		return $self -> YYParse(
+				yylex => \&_lexer,
+				yyerror => \&_error,
+				yydebug => 0x00
+		);
+
+		# Debug:
+    # Bit Value    Outputs
+    # 0x01         Token reading (useful for Lexer debugging)
+    # 0x02         States information
+    # 0x04         Driver actions (shifts, reduces, accept...)
+    # 0x08         Parse Stack dump
+    # 0x10         Error Recovery tracing
+		# To have a full debugging ouput, use
+    # debug => 0x1F
+}
+
+sub setTags {
+	my $self = shift;
+
+	$tags = shift;
+
+}
+
 sub getTag {
 		my $tag = shift;
 
@@ -166,33 +203,6 @@ sub getTag {
 			addError(_ERR_TAG_NOT_FOUND, $tag);
 			return 0;
 		}
-}
-
-# ==============================================================================
-
-sub _Error {
-		# Control Personalizado de errores =========================================
-		my $parser = shift;
-
-		# Token leido:
-		my $token = $parser -> YYCurtok;
-		# Valor del token leido
-		my $value = $parser -> YYCurval;
-		# la tira sin consumir
-		my $input = $parser -> YYData -> {INPUT} || $value;
-		# lista de los tokens que se esperaban
-		my $expected = join("' o '", grep(!/error/, $parser -> YYExpect));
-
-		addError( _ERR_WRONG_SINTAX, ($input || 'fin de expresion') );
-		addError( _ERR_TOKEN_EXPECTED, $expected );
-
-   	exists $parser -> YYData -> {ERRMSG} &&
-		do {
-				my $descerr = $parser -> YYData -> {ERRMSG};
-				addError($descerr);
-				delete $parser -> YYData -> {ERRMSG};
-				return;
-		};
 }
 
 sub addError {
@@ -212,9 +222,15 @@ sub getErrors {
     return \@errors;
 }
 
+sub dbg {
+		# Funcion para debuggear:
+		my $msg = shift;
+		warn "[WARNING] : SAYS: ". $msg if (DEBUG)
+}
+
 # ==============================================================================
 
-sub _Lexer {
+sub _lexer {
 
 	my $parser = shift;
 
@@ -293,54 +309,30 @@ sub _Lexer {
 	}
 }
 
-# ==============================================================================
+sub _error {
 
-sub setTags {
-	my $self = shift;
+		my $parser = shift;
 
-	$tags = shift;
+		# Token leido:
+		my $token = $parser -> YYCurtok;
+		# Valor del token leido
+		my $value = $parser -> YYCurval;
+		# la tira sin consumir
+		my $input = $parser -> YYData -> {INPUT} || $value;
+		# lista de los tokens que se esperaban
+		my $expected = join("' o '", grep(!/error/, $parser -> YYExpect));
 
+		addError( _ERR_WRONG_SINTAX, ($input || 'fin de expresion') );
+		addError( _ERR_TOKEN_EXPECTED, $expected );
+
+   	exists $parser -> YYData -> {ERRMSG} &&
+		do {
+				my $descerr = $parser -> YYData -> {ERRMSG};
+				addError($descerr);
+				delete $parser -> YYData -> {ERRMSG};
+				return;
+		};
 }
-
-sub run {
-
-		my $self = shift;
-		my $data = shift;
-
-		$self -> YYData -> {INPUT} = $data;
-
-		# Reset errors from previous runs:
-		$ERRORCNT = 0;	# Numero total de errores
-		@errors = ();
-
-		# Do the job:
-		return $self -> YYParse(
-				yylex => \&_Lexer,
-				yyerror => \&_Error,
-				yydebug => 0x00
-		);
-
-		# Debug:
-    # Bit Value    Outputs
-    # 0x01         Token reading (useful for Lexer debugging)
-    # 0x02         States information
-    # 0x04         Driver actions (shifts, reduces, accept...)
-    # 0x08         Parse Stack dump
-    # 0x10         Error Recovery tracing
-		# To have a full debugging ouput, use
-    # debug => 0x1F
-}
-
-sub dbg {
-		# Funcion para debuggear:
-		my $msg = shift;
-		warn "[WARNING] : SAYS: ". $msg if (DEBUG)
-}
-
-# ==============================================================================
-
-
-
 
 # ==============================================================================
 
