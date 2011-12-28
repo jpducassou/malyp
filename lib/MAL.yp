@@ -187,6 +187,7 @@ sub run {
 }
 
 sub set_tags {
+
 	my $self = shift;
 
 	$tags = shift;
@@ -200,14 +201,14 @@ sub get_tag {
 	if (exists $tags -> {$tag}) {
 		return $tags -> {$tag};
 	} else {
-		_add_error(_ERR_TAG_NOT_FOUND, $tag);
+		$self -> _add_error(_ERR_TAG_NOT_FOUND, $tag);
 		return 0;
 	}
 }
 
 sub _add_error {
 
-	# my $self = shift;
+	my $self = shift;
 
 	my $msg = shift;
 
@@ -221,8 +222,8 @@ sub _add_error {
 }
 
 sub get_errors {
-    my $self = shift;
-    return \@errors;
+	my $self = shift;
+	return \@errors;
 }
 
 # ==============================================================================
@@ -295,7 +296,7 @@ sub _lexer {
 		# If could not recognize a token and there is still something to read
 		# there is an error in the expression
 		my $input = $parser -> YYData -> {INPUT};
-		if ($input) { _add_error( _ERR_UNRECOGNISED_EXPRESION, $input); }
+		if ($input) { $self -> _add_error( _ERR_UNRECOGNISED_EXPRESION, $input); }
 
 		# As mentioned in the Parse::Yacc help
 		# we should return ('', undef) at the end
@@ -320,15 +321,15 @@ sub _error {
 	# list of expected tokens
 	my $expected = join("' o '", grep(!/error/, $self -> YYExpect));
 
-	_add_error( _ERR_WRONG_SYNTAX, ($input || 'fin de expresion') );
-	_add_error( _ERR_TOKEN_EXPECTED, $expected );
+	$self -> _add_error( _ERR_WRONG_SYNTAX, ($input || 'fin de expresion') );
+	$self -> _add_error( _ERR_TOKEN_EXPECTED, $expected );
 
 	exists $self -> YYData -> {ERRMSG} &&
 	do {
-			my $description = $self -> YYData -> {ERRMSG};
-			_add_error($description);
-			delete $self -> YYData -> {ERRMSG};
-			return;
+		my $description = $self -> YYData -> {ERRMSG};
+		$self -> _add_error($description);
+		delete $self -> YYData -> {ERRMSG};
+		return;
 	};
 
 }
