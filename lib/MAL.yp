@@ -52,8 +52,6 @@ use constant {
 
 # GLOBAL VARIABLES =============================================================
 
-my $PARSER;
-
 my $ERRORCNT;	# Numero total de errores
 my @errors;		# Array con los mensajes de cada error encontrado
 my $tags;			# Hash map con la lista de tags -> nro de linea
@@ -295,7 +293,7 @@ sub _lexer {
 
 		# If could not recognize a token and there is still something to read
 		# there is an error in the expression
-		my $input = $parser -> YYData -> {INPUT};
+		my $input = $self -> YYData -> {INPUT};
 		if ($input) { $self -> _add_error( _ERR_UNRECOGNISED_EXPRESION, $input); }
 
 		# As mentioned in the Parse::Yacc help
@@ -313,10 +311,10 @@ sub _error {
 	my $token = $self -> YYCurtok;
 
 	# Value of token read
-	my $value = $parser -> YYCurval;
+	my $value = $self -> YYCurval;
 
 	# input not consumed
-	my $input = $parser -> YYData -> {INPUT} || $value;
+	my $input = $self -> YYData -> {INPUT} || $value;
 
 	# list of expected tokens
 	my $expected = join("' o '", grep(!/error/, $self -> YYExpect));
