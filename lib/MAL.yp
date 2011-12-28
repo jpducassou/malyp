@@ -226,28 +226,27 @@ sub get_errors {
 
 sub _lexer {
 
-	my $parser = shift;
+	my $self = shift;
 
-	$parser -> YYData -> {INPUT} or
-	return('', undef);
+	$self -> YYData -> {INPUT} or return('', undef);
 
-	for ( $parser -> YYData -> {INPUT} ) {
+	for ( $self -> YYData -> {INPUT} ) {
 
 		s/^([\s\t\n\r]*)//; # se descartan espacios, tabuladores, saltos de linea.
 
-		# ==========================================================================
+		# ========================================================================
 		s/^(\=|\:\=)\s*//i                   && return('EQ', $1);
 		s/^(\;)\s*//i                        && return('SEMICOLON', $1);
 
-		# Shifts ===================================================================
+		# Shifts =================================================================
 		s/^(LSHIFT)\s*//i                    && return('LSHIFT', $1);
 		s/^(RSHIFT)\s*//i                    && return('RSHIFT', $1);
 
-		# io =======================================================================
+		# io =====================================================================
 		s/^(RD)\s*//i                        && return('RD', $1);
 		s/^(WR)\s*//i                        && return('WR', $1);
 
-		# Saltos ===================================================================
+		# Jumps ==================================================================
 		s/^(JMPZ)\s*//i                      && return('JMPZ', $1);
 		s/^(IF\s+Z\s+THEN\s+GOTO)\s*//i      && return('JMPZ', $1);
 		s/^(JMPN)\s*//i                      && return('JMPN', $1);
@@ -255,16 +254,16 @@ sub _lexer {
 		s/^(JMPA)\s*//i                      && return('JMPA', $1);
 		s/^(GOTO)\s*//i                      && return('JMPA', $1);
 
-		# Operadores Logicos =======================================================
+		# Logical operators ========================================================
 		s/^(NOT|NO|INV)\s*//i                && return('NOT', $1);
 		s/^(AND|Y)\s*//i                     && return('AND', $1);
 		s/^(\+)\s*//i                        && return('PLUS', $1);
 
-		# Parentesis ===============================================================
+		# Brackets =================================================================
 		s/^([\(])\s*//                       && return('PLEFT', $1);
 		s/^([\)])\s*//                       && return('PRIGHT', $1);
 
-		# Registros ================================================================
+		# Registers ================================================================
 		s/^(ALU)\s*//i                       && return('ALU', $1);
 		s/^(MAR)\s*//i                       && return('MAR', $1);
 		s/^(MBR)\s*//i                       && return('MBR', $1);
@@ -290,13 +289,13 @@ sub _lexer {
 		s/^[\{]\s*(.*?)[\}]//                && return('COMMENT', $1);
 		s/^\#\s*(.*)$//i                     && return('COMMENT', $1);
 
-		# Si no reconozco un token y todavia hay tira por leer
-		# hay un error en la expresion
+		# If could not recognize a token and there is still something to read
+		# there is an error in the expression
 		my $input = $parser -> YYData -> {INPUT};
 		if ($input) { _add_error( _ERR_UNRECOGNISED_EXPRESION, $input); }
 
-		# Segun lo especificado en la ayuda Parse::Yacc
-		# al terminar se debe retornar ('', undef)
+		# As mentioned in the Parse::Yacc help
+		# we should return ('', undef) at the end
 		return('', undef);
 
 	}
