@@ -28,16 +28,16 @@
 
 %{
 
-# PERL HEADER CODE =============================================================
+# PERL HEADER CODE ===========================================================
 
-# USE ==========================================================================
+# USE ========================================================================
 
 use strict;
 use warnings;
 
 use Data::Dumper;
 
-# CONSTANTS ====================================================================
+# CONSTANTS ==================================================================
 use constant DEBUG => 1;
 
 # Mensajes de Errores
@@ -50,12 +50,7 @@ use constant {
 	_ERR_TAG_NOT_FOUND	=> 'No se encontro el tag: _ERROR_',
 };
 
-# GLOBAL VARIABLES =============================================================
-
-my $ERRORCNT;	# Numero total de errores
-my @errors;		# Array con los mensajes de cada error encontrado
-my $tags;			# Hash map con la lista de tags -> nro de linea
-
+# ============================================================================
 # bus mic offset
 use constant {
 	BUS_A => 2**8,	# 256
@@ -83,7 +78,7 @@ use constant {
 	BIT_AMUX => 2**31
 };
 
-# END OF PERL HEADER ===========================================================
+# END OF PERL HEADER =========================================================
 
 %}
 
@@ -147,13 +142,25 @@ sent_io:
 ;
 
 sent_jmp:
-	JMPZ TAG { COND_Z | getTag($_[2]) } |
-	JMPN TAG { COND_N | getTag($_[2]) } |
-	JMPA TAG { COND_A | getTag($_[2]) } ;
+	JMPZ TAG { COND_Z | $_[0] -> getTag($_[2]) } |
+	JMPN TAG { COND_N | $_[0] -> getTag($_[2]) } |
+	JMPA TAG { COND_A | $_[0] -> getTag($_[2]) } ;
 
 %%
 
-# ==============================================================================
+# ============================================================================
+
+sub new {
+
+	my $class = shift;
+
+	my $self = $class -> SUPER::new(@_);
+	$self -> {'MALYP'} -> {'errors'} = [];
+	$self -> {'MALYP'} -> {'tags'} = {};
+
+	return $self;
+
+}
 
 sub run {
 
@@ -163,14 +170,13 @@ sub run {
 	$self -> YYData -> {INPUT} = $data;
 
 	# Reset errors from previous runs:
-	$ERRORCNT = 0;	# Numero total de errores
-	@errors = ();
+	$self -> {'MALYP'} -> {'errors'} = [];
 
 	# Do the job:
 	return $self -> YYParse(
-			yylex => \&_lexer,
-			yyerror => \&_error,
-			yydebug => 0x00
+		yylex => \&_lexer,
+		yyerror => \&_error,
+		yydebug => 0x00
 	);
 
 	# Debug:
@@ -188,16 +194,18 @@ sub set_tags {
 
 	my $self = shift;
 
-	$tags = shift;
+	$self -> {'MALYP'} -> {'tags'} = shift;
 
 }
 
 sub get_tag {
+
+	my $self = shift;
+
 	my $tag = shift;
 
-	# return  (exists $tags -> {$tag}) ? $tags -> {$tag} : 0;
-	if (exists $tags -> {$tag}) {
-		return $tags -> {$tag};
+	if (exists $self -> {'MALYP'} -> {'tags'} -> {$tag}) {
+		return $self -> {'MALYP'} -> {'tags'} -> {$tag};
 	} else {
 		$self -> _add_error(_ERR_TAG_NOT_FOUND, $tag);
 		return 0;
@@ -211,20 +219,19 @@ sub _add_error {
 	my $msg = shift;
 
 	while (my $val = shift) {
-			$msg =~ s/_ERROR_/'$val'/;
+		$msg =~ s/_ERROR_/'$val'/;
 	}
 	$msg =~ s/_ERROR_//g;
 
-	$ERRORCNT++;
-	unshift @errors, $msg;
+	unshift @{$self -> {'MALYP'} -> {'errors'}}, $msg;
 }
 
 sub get_errors {
 	my $self = shift;
-	return \@errors;
+	return $self -> {'MALYP'} -> {'errors'};
 }
 
-# ==============================================================================
+# ============================================================================
 
 sub _lexer {
 
@@ -256,16 +263,16 @@ sub _lexer {
 		s/^(JMPA)\s*//i                      && return('JMPA', $1);
 		s/^(GOTO)\s*//i                      && return('JMPA', $1);
 
-		# Logical operators ========================================================
+		# Logical operators ======================================================
 		s/^(NOT|NO|INV)\s*//i                && return('NOT', $1);
 		s/^(AND|Y)\s*//i                     && return('AND', $1);
 		s/^(\+)\s*//i                        && return('PLUS', $1);
 
-		# Brackets =================================================================
+		# Brackets ===============================================================
 		s/^([\(])\s*//                       && return('PLEFT', $1);
 		s/^([\)])\s*//                       && return('PRIGHT', $1);
 
-		# Registers ================================================================
+		# Registers ==============================================================
 		s/^(ALU)\s*//i                       && return('ALU', $1);
 		s/^(MAR)\s*//i                       && return('MAR', $1);
 		s/^(MBR)\s*//i                       && return('MBR', $1);
@@ -286,7 +293,7 @@ sub _lexer {
 		s/^(E)\s*//i                         && return('E',   14);
 		s/^(F)\s*//i                         && return('F',   15);
 
-		# Strings ==================================================================
+		# Strings ================================================================
 		s/^[\<]\s*(\w+)\s*[\>]//             && return('TAG', $1);
 		s/^[\{]\s*(.*?)[\}]//                && return('COMMENT', $1);
 		s/^\#\s*(.*)$//i                     && return('COMMENT', $1);
@@ -332,6 +339,6 @@ sub _error {
 
 }
 
-# ==============================================================================
+# ============================================================================
 
 1;
