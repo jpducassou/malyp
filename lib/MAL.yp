@@ -31,11 +31,7 @@
 # PERL HEADER CODE ===========================================================
 
 # USE ========================================================================
-
-use strict;
 use warnings;
-
-use Data::Dumper;
 
 # CONSTANTS ==================================================================
 use constant DEBUG => 1;
@@ -151,18 +147,6 @@ sent_jmp:
 
 # ============================================================================
 
-sub new {
-
-	my $class = shift;
-
-	my $self = $class -> SUPER::new(@_);
-	$self -> {'MALYP'} -> {'errors'} = [];
-	$self -> {'MALYP'} -> {'tags'} = {};
-
-	return $self;
-
-}
-
 sub run {
 
 	my $self = shift;
@@ -172,6 +156,9 @@ sub run {
 
 	# Reset errors from previous runs:
 	$self -> {'MALYP'} -> {'errors'} = [];
+
+	# And reset tags too:
+	$self -> {'MALYP'} -> {'tags'} = {};
 
 	# Do the job:
 	return $self -> YYParse(

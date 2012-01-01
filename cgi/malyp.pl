@@ -12,7 +12,7 @@ use lib '../lib';
 use MAL;
 
 # ==============================================================================
-sub run() {
+sub run {
 
 	my $tags;
 	my @lines;
@@ -97,4 +97,4 @@ PARSER:
 	}
 }
 
-run() unless caller();
+run(@ARGV) unless caller();
