@@ -152,7 +152,7 @@ sub run {
 	my $self = shift;
 	my $data = shift;
 
-	$self -> YYData -> {INPUT} = $data;
+	$self -> YYData -> {INPUT} = $data if $data;
 
 	# Reset errors from previous runs:
 	$self -> {'MALYP'} -> {'errors'} = [];
