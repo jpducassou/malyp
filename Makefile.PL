@@ -1,25 +1,23 @@
 #!/usr/bin/perl
+
 # ============================================================================
 use strict;
 use warnings;
 
 # ============================================================================
-use Test::More tests => 10;
+use ExtUtils::MakeMaker;
 
 # ============================================================================
-my $directory = 'data';
-my $dh;
-opendir($dh, $directory) || die "can't opendir $directory: $!";
-my @files = grep { /\.in$/ && -f "$directory/$_" } readdir($dh);
-closedir $dh;
+# my $YAPP_COMMAND = 'yapp -o lib/Parse/MAL.pm -m Parse::MAL lib/Parse/MAL.yp';
 
 # ============================================================================
-foreach my $file_id (@files) {
-	$file_id =~ s/\.in$//;
-	system('sh', 'compare.sh', $file_id);
-	is($? >> 8, 0, 'Diff exited with 0 for compare ' . $file_id);
-}
+WriteMakefile(
+	NAME          => 'Parse::MAL',
+	VERSION_FROM  => 'lib/Parse/MAL.yp',
+	PREREQ_PM     => { 'Parse::Yapp' => 0 },
+	EXE_FILES     => [ 'bin/mal' ],
+	AUTHOR        => 'Jean Pierre Ducassou <jpducassou@gmail.com>',
+);
 
 # ============================================================================
-# THE END
-done_testing();
+__END__

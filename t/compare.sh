@@ -1,2 +1,3 @@
 #/bin/sh
-perl ../bin/malyp.pl < data/$1.in | diff data/$1.out -
+perl -I../lib ../bin/mal < data/$1.in | diff data/$1.out -
+

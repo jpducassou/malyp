@@ -1,8 +1,19 @@
 # Ignore the following files/folders withing this proyect:
+*.[oa]
+*~
+*.log
+*.swp
+*.gz
+*.tar.gz
+*.tar.bz2
+*.mo
 *.mo
 *.bak
 *.old
+*.new
 
 # Specific
-lib/MAL.pm
+lib/Parse/MAL.pm
+blib/
+pm_to_blib
 
