@@ -333,3 +333,50 @@ sub _error {
 # ============================================================================
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Parse::MAL - micro assembly language parser and compiler
+
+=head1 SYNOPSIS
+
+				use Parse::MAL;
+
+				# Create parser object:
+				my $parser = Parse::MAL -> new();
+
+				# Set tag map
+				$parser -> set_tags($tags);
+
+				# Process line
+				my $sentence = $parser -> run($line);
+
+=head1 DESCRIPTION
+
+Parse::MAL is a compiler that turns micro assembly language (MAL) into Mic-1 microinstructions.
+This program was designed for compiling for the Mic1 Microprogramming Simulator found in:
+http://cis.stvincent.edu/carlsond/cs330/mic1/mic1.html
+
+=head1 AUTHOR
+
+Jean Pierre Ducassou
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright Jean Pierre Ducassou.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
+
+=head1 SEE ALSO
+
+L<Parse::Yapp>
+
+=cut
