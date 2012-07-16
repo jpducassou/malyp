@@ -12,13 +12,23 @@ use ExtUtils::MakeMaker;
 
 # ============================================================================
 WriteMakefile(
-	NAME          => 'Parse::MAL',
-	VERSION_FROM  => 'lib/Parse/MAL.yp',
-	PREREQ_PM     => { 'Parse::Yapp' => 0 },
-	EXE_FILES     => [ 'bin/mal' ],
-	AUTHOR        => 'Jean Pierre Ducassou <jpducassou@gmail.com>',
+	NAME         => 'Parse::MAL',
+	VERSION_FROM => 'lib/Parse/MAL.yp',
+	PREREQ_PM    => { 'Parse::Yapp' => 0 },
+	EXE_FILES    => [ 'bin/mal' ],
+	LICENSE      => 'perl',
+	AUTHOR       => 'Jean Pierre Ducassou <jpducassou@gmail.com>',
+ 	PM           => { 'lib/Parse/MAL.pm' => '$(INST_LIBDIR)/MAL.pm' }
 );
 
 # ============================================================================
-__END__
+sub MY::postamble {
+    my $postamble = <<'END';
 
+include mal.mk
+
+END
+    $postamble;
+}
+
+__END__
