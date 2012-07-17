@@ -1,9 +1,3 @@
-#
-# MAL compiler
-#
-# Gramatica para el compilador de MAL
-#
-#
 
 # Token declarations:
 %token  PLUS AND NOT
