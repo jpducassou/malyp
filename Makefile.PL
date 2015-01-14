@@ -18,17 +18,17 @@ WriteMakefile(
 	EXE_FILES    => [ 'bin/mal' ],
 	LICENSE      => 'perl',
 	AUTHOR       => 'Jean Pierre Ducassou <jpducassou@gmail.com>',
- 	PM           => { 'lib/Parse/MAL.pm' => '$(INST_LIBDIR)/MAL.pm' }
+	PM           => { 'lib/Parse/MAL.pm' => '$(INST_LIBDIR)/MAL.pm' }
 );
 
 # ============================================================================
 sub MY::postamble {
-    my $postamble = <<'END';
+	my $postamble = <<'END';
 
 include mal.mk
 
 END
-    $postamble;
+	$postamble;
 }
 
 __END__
