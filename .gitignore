@@ -12,8 +12,12 @@
 *.old
 *.new
 
-# Specific
+# Generated file
 lib/Parse/MAL.pm
+
+# Carton temp files
+/local/
+/local-perl-*/
 
 # For build process
 blib/
