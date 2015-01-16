@@ -91,8 +91,8 @@ sent:
 sent_alu:
 	ALU  EQ shifter { $_[3] } |
 	wreg EQ shifter { ($_[1] * BUS_C) | BIT_ENC | $_[3] } |
-	MAR  EQ rreg { BIT_MAR | ALU_IDD | ($_[3] * BUS_B) } |
-	MBR  EQ shifter { BIT_MBR	| $_[3] }
+	MAR  EQ rreg    { BIT_MAR | ALU_IDD | ($_[3] * BUS_B) } |
+	MBR  EQ shifter { BIT_MBR | $_[3] }
 ;
 
 shifter:
@@ -102,19 +102,19 @@ shifter:
 ;
 
 op:
-	rreg AND rreg		{ ALU_AND  | ($_[3] * BUS_A) | ($_[1] * BUS_B) } |
-	rreg PLUS rreg	{ ALU_PLUS | ($_[3] * BUS_A) | ($_[1] * BUS_B) } |
-	NOT PLEFT rreg PRIGHT	{ ALU_NOT  | ($_[3] * BUS_A) } |
-	rreg						{ ALU_IDD  | ($_[1] * BUS_A) } |
+	rreg AND rreg         { ALU_AND  | ($_[3] * BUS_A) | ($_[1] * BUS_B) } |
+	rreg PLUS rreg        { ALU_PLUS | ($_[3] * BUS_A) | ($_[1] * BUS_B) } |
+	NOT PLEFT rreg PRIGHT { ALU_NOT  | ($_[3] * BUS_A) } |
+	rreg                  { ALU_IDD  | ($_[1] * BUS_A) } |
 
-	MBR  AND rreg		{ ALU_AND | BIT_AMUX | ($_[3] * BUS_B) } |
-	rreg AND MBR		{ ALU_AND | BIT_AMUX | ($_[1] * BUS_B) } |
+	MBR  AND rreg  { ALU_AND | BIT_AMUX | ($_[3] * BUS_B) } |
+	rreg AND MBR   { ALU_AND | BIT_AMUX | ($_[1] * BUS_B) } |
 
-	MBR  PLUS rreg	{ ALU_PLUS | BIT_AMUX | ($_[3] * BUS_B) } |
-	rreg PLUS MBR		{ ALU_PLUS | BIT_AMUX | ($_[1] * BUS_B) } |
+	MBR  PLUS rreg { ALU_PLUS | BIT_AMUX | ($_[3] * BUS_B) } |
+	rreg PLUS MBR  { ALU_PLUS | BIT_AMUX | ($_[1] * BUS_B) } |
 
-	NOT PLEFT MBR	PRIGHT	{ ALU_NOT | BIT_AMUX } |
-	MBR							{ ALU_IDD | BIT_AMUX } |
+	NOT PLEFT MBR PRIGHT { ALU_NOT | BIT_AMUX } |
+	MBR                  { ALU_IDD | BIT_AMUX } |
 ;
 
 wreg:
@@ -154,7 +154,7 @@ sub run {
 
 	# Do the job:
 	return $self -> YYParse(
-		yylex => \&_lexer,
+		yylex   => \&_lexer,
 		yyerror => \&_error,
 		yydebug => 0x00
 	);
@@ -333,16 +333,16 @@ Parse::MAL - micro assembly language parser and compiler
 
 =head1 SYNOPSIS
 
-				use Parse::MAL;
+	use Parse::MAL;
 
-				# Create parser object:
-				my $parser = Parse::MAL -> new();
+	# Create parser object:
+	my $parser = Parse::MAL -> new();
 
-				# Set tag map
-				$parser -> set_tags($tags);
+	# Set tag map
+	$parser -> set_tags($tags);
 
-				# Process line
-				my $sentence = $parser -> run($line);
+	# Process line
+	my $sentence = $parser -> run($line);
 
 =head1 DESCRIPTION
 
