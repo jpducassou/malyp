@@ -1,0 +1,14 @@
+# carton snapshot format: version 1.0
+DISTRIBUTIONS
+  Parse-Yapp-1.05
+    pathname: F/FD/FDESAR/Parse-Yapp-1.05.tar.gz
+    provides:
+      Parse::Yapp undef
+      Parse::Yapp::Driver 1.05
+      Parse::Yapp::Grammar undef
+      Parse::Yapp::Lalr undef
+      Parse::Yapp::Options undef
+      Parse::Yapp::Output undef
+      Parse::Yapp::Parse undef
+    requirements:
+      ExtUtils::MakeMaker 0
