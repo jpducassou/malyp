@@ -107,14 +107,14 @@ op:
 	NOT PLEFT rreg PRIGHT { ALU_NOT  | ($_[3] * BUS_A) } |
 	rreg                  { ALU_IDD  | ($_[1] * BUS_A) } |
 
-	MBR  AND rreg  { ALU_AND | BIT_AMUX | ($_[3] * BUS_B) } |
-	rreg AND MBR   { ALU_AND | BIT_AMUX | ($_[1] * BUS_B) } |
+	MBR  AND rreg         { ALU_AND | BIT_AMUX | ($_[3] * BUS_B) } |
+	rreg AND MBR          { ALU_AND | BIT_AMUX | ($_[1] * BUS_B) } |
 
-	MBR  PLUS rreg { ALU_PLUS | BIT_AMUX | ($_[3] * BUS_B) } |
-	rreg PLUS MBR  { ALU_PLUS | BIT_AMUX | ($_[1] * BUS_B) } |
+	MBR  PLUS rreg        { ALU_PLUS | BIT_AMUX | ($_[3] * BUS_B) } |
+	rreg PLUS MBR         { ALU_PLUS | BIT_AMUX | ($_[1] * BUS_B) } |
 
-	NOT PLEFT MBR PRIGHT { ALU_NOT | BIT_AMUX } |
-	MBR                  { ALU_IDD | BIT_AMUX } |
+	NOT PLEFT MBR PRIGHT  { ALU_NOT | BIT_AMUX } |
+	MBR                   { ALU_IDD | BIT_AMUX } |
 ;
 
 wreg:
@@ -133,7 +133,8 @@ sent_io:
 sent_jmp:
 	JMPZ TAG { COND_Z | $_[0] -> getTag($_[2]) } |
 	JMPN TAG { COND_N | $_[0] -> getTag($_[2]) } |
-	JMPA TAG { COND_A | $_[0] -> getTag($_[2]) } ;
+	JMPA TAG { COND_A | $_[0] -> getTag($_[2]) }
+;
 
 %%
 
@@ -369,3 +370,4 @@ See http://dev.perl.org/licenses/ for more information.
 L<Parse::Yapp>
 
 =cut
+
