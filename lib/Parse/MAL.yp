@@ -142,8 +142,7 @@ sent_jmp:
 
 sub run {
 
-	my $self = shift;
-	my $data = shift;
+	my ($self, $data) = @_;
 
 	$self -> YYData -> {INPUT} = $data if $data;
 
@@ -216,7 +215,7 @@ sub get_errors {
 
 sub _lexer {
 
-	my $self = shift;
+	my ($self) = @_;
 
 	$self -> YYData -> {INPUT} or return('', undef);
 
