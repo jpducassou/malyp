@@ -346,8 +346,8 @@ Parse::MAL - micro assembly language parser and compiler
 
 =head1 DESCRIPTION
 
-Parse::MAL is a compiler that turns micro assembly language (MAL) into Mic-1 microinstructions.
-This program was designed for compiling for the Mic1 Microprogramming Simulator found in:
+Parse::MAL is an assembler that turns micro assembly language (MAL) into Mic-1 microinstructions.
+This program was designed for the Mic1 Microprogramming Simulator found in:
 http://cis.stvincent.edu/carlsond/cs330/mic1/mic1.html
 
 =head1 AUTHOR
