@@ -4,7 +4,6 @@
 %token	LSHIFT RSHIFT
 %token	EQ SEMICOLON
 %token	COMMENT
-%token	TAG
 %token	PLEFT PRIGHT
 %token	JMPZ JMPN JMPA
 %token	AC SP IR TIR ZERO ONE _ONE AMASK SMASK A B C D E F
@@ -131,20 +130,20 @@ sent_io:
 ;
 
 sent_jmp:
-	JMPZ TAG { COND_Z | $_[0] -> getTag($_[2]) } |
-	JMPN TAG { COND_N | $_[0] -> getTag($_[2]) } |
-	JMPA TAG { COND_A | $_[0] -> getTag($_[2]) }
+	JMPZ { COND_Z | $_[1] } |
+	JMPN { COND_N | $_[1] } |
+	JMPA { COND_A | $_[1] }
 ;
 
 %%
 
 # ============================================================================
 
-sub run {
+sub process {
 
-	my ($self, $data) = @_;
+	my ($self, $input) = @_;
 
-	$self -> YYData -> {INPUT} = $data if $data;
+	$self -> YYData -> {INPUT} = $input if $input;
 
 	# Reset errors from previous runs:
 	$self -> {'MALYP'} -> {'errors'} = [];
@@ -168,11 +167,12 @@ sub run {
 	# 0x10         Error Recovery tracing
 	# To have a full debugging ouput, use
 	# debug => 0x1F
+
 }
 
 sub set_tags {
 
-	my $self = shift;
+	my ($self) = @_;
 
 	$self -> {'MALYP'} -> {'tags'} = shift;
 
@@ -180,16 +180,17 @@ sub set_tags {
 
 sub get_tag {
 
-	my $self = shift;
+	my ($self, $tag) = @_;
 
-	my $tag = shift;
+	return $tag if ($tag =~ /^\d+$/);
 
 	if (exists $self -> {'MALYP'} -> {'tags'} -> {$tag}) {
 		return $self -> {'MALYP'} -> {'tags'} -> {$tag};
-	} else {
-		$self -> _add_error(_ERR_TAG_NOT_FOUND, $tag);
-		return 0;
 	}
+
+	$self -> _add_error(_ERR_TAG_NOT_FOUND, $tag);
+	return 0;
+
 }
 
 sub _add_error {
@@ -236,12 +237,12 @@ sub _lexer {
 		s/^(WR)\s*//i                        && return('WR',        $1);
 
 		# Jumps ==================================================================
-		s/^(JMPZ)\s*//i                      && return('JMPZ',      $1);
-		s/^(IF\s+Z\s+THEN\s+GOTO)\s*//i      && return('JMPZ',      $1);
-		s/^(JMPN)\s*//i                      && return('JMPN',      $1);
-		s/^(IF\s+N\s+THEN\s+GOTO)\s*//i      && return('JMPN',      $1);
-		s/^(JMPA)\s*//i                      && return('JMPA',      $1);
-		s/^(GOTO)\s*//i                      && return('JMPA',      $1);
+		s/^(JMPZ)\s*(\d+)\s*//i                 && return('JMPZ',   $2);
+		s/^(IF\s+Z\s+THEN\s+GOTO)\s*(\d+)\s*//i && return('JMPZ',   $2);
+		s/^(JMPN)\s*(\d+)\s*//i                 && return('JMPN',   $2);
+		s/^(IF\s+N\s+THEN\s+GOTO)\s*(\d+)\s*//i && return('JMPN',   $2);
+		s/^(JMPA)\s*(\d+)\s*//i                 && return('JMPA',   $2);
+		s/^(GOTO)\s*(\d+)\s*//i                 && return('JMPA',   $2);
 
 		# Logical operators ======================================================
 		s/^(NOT|NO|INV)\s*//i                && return('NOT',       $1);
@@ -273,8 +274,7 @@ sub _lexer {
 		s/^(E)\s*//i                         && return('E',         14);
 		s/^(F)\s*//i                         && return('F',         15);
 
-		# Strings ================================================================
-		s/^[\<]\s*(\w+)\s*[\>]//             && return('TAG',       $1);
+		# Comments ===============================================================
 		s/^[\{]\s*(.*?)[\}]//                && return('COMMENT',   $1);
 		s/^\#\s*(.*)$//i                     && return('COMMENT',   $1);
 
@@ -349,6 +349,9 @@ Parse::MAL - micro assembly language parser and compiler
 Parse::MAL is an assembler that turns micro assembly language (MAL) into Mic-1 microinstructions.
 This program was designed for the Mic1 Microprogramming Simulator found in:
 http://cis.stvincent.edu/carlsond/cs330/mic1/mic1.html
+
+The process() method is called to process assembler input. The first parameter indicates the input as one of: a filename, if defined; a reference to a text string containing assembler text; or a file handle reference (e.g. IO::Handle or sub-class) or GLOB (e.g. \*STDIN), from which the input can be read.
+By default, the processed input's output is printed to STDOUT.
 
 =head1 AUTHOR
 
