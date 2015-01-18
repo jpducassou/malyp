@@ -18,6 +18,10 @@
 
 # USE ========================================================================
 use warnings;
+use Carp;
+
+# ============================================================================
+use IO::String;
 
 # ============================================================================
 our $VERSION = '1.00';
@@ -143,7 +147,24 @@ sub process {
 
 	my ($self, $input) = @_;
 
-	$self -> YYData -> {INPUT} = $input if $input;
+	croak 'Input not set!' unless $input;
+
+	my $io_handle;
+	if (ref $input) {
+		if ( ref $input eq 'SCALAR') {
+			$io_handle = IO::String -> new($$input);
+		} elsif (ref $input eq 'IO' or ref $input eq 'GLOB') {
+			$io_handle = $input;
+		} else {
+			croak 'Unrecognized REF';
+		}
+	} else {
+		# It's a filename
+		open($io_handle, '<', $input) or croak "Cannot open file $input";
+	}
+
+	$self -> YYData -> {'INPUT_HANDLE'} = $io_handle;
+	$self -> YYData -> {'INPUT_LINE'}   = '';
 
 	# Reset errors from previous runs:
 	$self -> {'MALYP'} -> {'errors'} = [];
@@ -218,10 +239,11 @@ sub _lexer {
 
 	my ($self) = @_;
 
-	$self -> YYData -> {INPUT} or return('', undef);
+	my $io_handle = $self -> YYData -> {'INPUT_HANDLE'};
 
-	for ( $self -> YYData -> {INPUT} ) {
+	for ( $self -> YYData -> {'INPUT_LINE'} or ($self -> YYData -> {'INPUT_LINE'} = <$io_handle>) ) {
 
+		$self -> YYData -> {'INPUT_LINE'} or return('', undef);
 		s/^([\s\t\n\r]*)//; # tabs, spaces, etc discarded
 
 		# ========================================================================
@@ -280,14 +302,17 @@ sub _lexer {
 
 		# If could not recognize a token and there is still something to read
 		# there is an error in the expression
-		my $input = $self -> YYData -> {INPUT};
-		if ($input) { $self -> _add_error( _ERR_UNRECOGNISED_EXPRESION, $input); }
+		$self -> _add_error( _ERR_UNRECOGNISED_EXPRESION, $_) if $_;
 
 		# As mentioned in the Parse::Yacc help
 		# we should return ('', undef) at the end
 		return('', undef);
 
 	}
+
+	# EOF
+	return('', undef);
+
 }
 
 sub _error {
