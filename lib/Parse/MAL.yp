@@ -77,8 +77,8 @@ use constant {
 %%
 
 main:
-	sent_list |
-	sent_list COMMENT
+	sent_list         { $_[0] -> line($_[1]) } |
+	sent_list COMMENT { $_[0] -> line($_[1]) }
 ;
 
 sent_list:
@@ -143,28 +143,58 @@ sent_jmp:
 
 # ============================================================================
 
+sub line {
+
+	my ($self, $line_value) = @_;
+	my $output_fh = $self -> YYData -> {'OUTPUT_HANDLE'};
+	print $output_fh $line_value;
+	return;
+
+}
+
 sub process {
 
-	my ($self, $input) = @_;
+	my ($self, $input, $output) = @_;
 
+	# INPUT selection
 	croak 'Input not set!' unless $input;
 
-	my $io_handle;
+	my $input_fh;
 	if (ref $input) {
 		if ( ref $input eq 'SCALAR') {
-			$io_handle = IO::String -> new($$input);
+			$input_fh = IO::String -> new($$input);
 		} elsif (ref $input eq 'IO' or ref $input eq 'GLOB') {
-			$io_handle = $input;
+			$input_fh = $input;
 		} else {
-			croak 'Unrecognized REF';
+			croak 'Unrecognized REF for input';
 		}
 	} else {
 		# It's a filename
-		open($io_handle, '<', $input) or croak "Cannot open file $input";
+		open($input_fh, '<', $input) or croak "Cannot open file $input for reading!";
 	}
 
-	$self -> YYData -> {'INPUT_HANDLE'} = $io_handle;
-	$self -> YYData -> {'INPUT_LINE'}   = '';
+	# OUTPUT selection
+	my $output_fh;
+	if ($output) {
+		if (ref $output) {
+			if ( ref $output eq 'SCALAR') {
+				$output_fh = IO::String -> new($$output);
+			} elsif (ref $output eq 'IO' or ref $output eq 'GLOB') {
+				$output_fh = $output;
+			} else {
+				croak 'Unrecognized REF for output';
+			}
+		} else {
+			# It's a filename
+			open($output_fh, '>', $output) or croak "Cannot open file $output for writing!";
+		}
+	} else {
+		$output_fh = \*STDOUT;
+	}
+
+	$self -> YYData -> {'INPUT_HANDLE'}  = $input_fh;
+	$self -> YYData -> {'OUTPUT_HANDLE'} = $output_fh;
+	$self -> YYData -> {'INPUT_LINE'}    = '';
 
 	# Reset errors from previous runs:
 	$self -> YYData -> {'errors'} = [];

@@ -25,27 +25,35 @@ can_ok($parser, 'process');
 can_ok($parser, 'get_errors');
 
 # ==========================================================================
-my ($input, $expected);
+my ($input, $output, $expected);
 
 # ==========================================================================
 $input    = 'ac := ac + 1;';
 $expected = 0b00000000000100010001011000000000;
-is($parser -> process(\$input), $expected, 'ac++ with direct string');
+$output   = '';
+$parser -> process(\$input, \$output);
+is($output, $expected, 'ac++ with direct string');
 
 # ==========================================================================
 $input    = 'ac := ac + 1; if n then goto 4;';
 $expected = 0b00100000000100010001011000000100;
-is($parser -> process(\$input), $expected, 'ac++ and goto with direct string');
+$output   = '';
+$parser -> process(\$input, \$output);
+is($output, $expected, 'ac++ and goto with direct string');
 
 # ==========================================================================
 $input    = "ac := ac + 1;\nac := ac + 1;\n";
 $expected = 0b00000000000100010001011000000000;
-is($parser -> process(\$input), $expected, '2 x ac++ with direct string');
+$output   = '';
+$parser -> process(\$input, \$output);
+is($output, $expected, '2 x ac++ with direct string');
 
 # ==========================================================================
 $input    = "ac := \nac + 1;";;
 $expected = 0b00000000000100010001011000000000;
-is($parser -> process(\$input), $expected, 'ac++ split in two lines');
+$output   = '';
+$parser -> process(\$input, \$output);
+is($output, $expected, 'ac++ split in two lines');
 
 # ==========================================================================
 done_testing();
