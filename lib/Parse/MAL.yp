@@ -77,8 +77,8 @@ use constant {
 %%
 
 main:
-	sent_list         { $_[0] -> line($_[1]) } |
-	sent_list COMMENT { $_[0] -> line($_[1]) }
+	sent_list         { $_[0] -> _line($_[1]) } |
+	sent_list COMMENT { $_[0] -> _line($_[1]) }
 ;
 
 sent_list:
@@ -142,15 +142,6 @@ sent_jmp:
 %%
 
 # ============================================================================
-
-sub line {
-
-	my ($self, $line_value) = @_;
-	my $output_fh = $self -> YYData -> {'OUTPUT_HANDLE'};
-	print $output_fh $line_value;
-	return;
-
-}
 
 sub process {
 
@@ -218,6 +209,25 @@ sub process {
 	# 0x10         Error Recovery tracing
 	# To have a full debugging ouput, use
 	# debug => 0x1F
+
+}
+
+sub _line {
+
+	my ($self, $line_value) = @_;
+	my $output_fh = $self -> YYData -> {'OUTPUT_HANDLE'};
+	unless ($self -> YYData -> {'WANT_BINARY'}) {
+		$line_value = $self -> sentence_as_string($line_value);
+	}
+	print $output_fh $line_value;
+	return;
+
+}
+
+sub want_binary {
+
+	my ($self) = @_;
+	$self -> YYData -> {'WANT_BINARY'} = 1;
 
 }
 
