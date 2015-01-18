@@ -317,7 +317,7 @@ sub _lexer {
 
 sub _error {
 
-	my $self = shift;
+	my ($self) = @_;
 
 	# Token read:
 	my $token = $self -> YYCurtok;
@@ -343,6 +343,35 @@ sub _error {
 	};
 
 }
+
+sub sentence_as_string {
+
+	my ($self, $sentence) = @_;
+
+	my $strbin = sprintf '%032b', $sentence;
+	my $strpp = '';
+
+	$strpp .= substr( $strbin, 0,  1 ) . ' '; # AMUX
+	$strpp .= substr( $strbin, 1,  2 ) . ' '; # COND
+	$strpp .= substr( $strbin, 3,  2 ) . ' '; # ALU
+	$strpp .= substr( $strbin, 5,  2 ) . ' '; # SH
+	$strpp .= substr( $strbin, 7,  1 ) . ' '; # MBR
+	$strpp .= substr( $strbin, 8,  1 ) . ' '; # MAR
+	$strpp .= substr( $strbin, 9,  1 ) . ' '; # RD
+	$strpp .= substr( $strbin, 10, 1 ) . ' '; # WR
+	$strpp .= substr( $strbin, 11, 1 ) . ' '; # ENC
+	$strpp .= substr( $strbin, 12, 4 ) . ' '; # C
+	$strpp .= substr( $strbin, 16, 4 ) . ' '; # B
+	$strpp .= substr( $strbin, 20, 4 ) . ' '; # A
+	$strpp .= substr( $strbin, 24, 8 ) . ' '; # ADDR
+
+	$strpp =~ s/(\d)/$1 /g;
+	$strpp =~ s/\s*$//;
+
+	return $strpp;
+
+}
+
 
 # ============================================================================
 
