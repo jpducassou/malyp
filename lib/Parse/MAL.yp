@@ -167,10 +167,10 @@ sub process {
 	$self -> YYData -> {'INPUT_LINE'}   = '';
 
 	# Reset errors from previous runs:
-	$self -> {'MALYP'} -> {'errors'} = [];
+	$self -> YYData -> {'errors'} = [];
 
 	# And reset tags too:
-	$self -> {'MALYP'} -> {'tags'} = {};
+	$self -> YYData -> {'tags'} = {};
 
 	# Do the job:
 	return $self -> YYParse(
@@ -195,7 +195,7 @@ sub set_tags {
 
 	my ($self) = @_;
 
-	$self -> {'MALYP'} -> {'tags'} = shift;
+	$self -> YYData -> {'tags'} = shift;
 
 }
 
@@ -205,8 +205,8 @@ sub get_tag {
 
 	return $tag if ($tag =~ /^\d+$/);
 
-	if (exists $self -> {'MALYP'} -> {'tags'} -> {$tag}) {
-		return $self -> {'MALYP'} -> {'tags'} -> {$tag};
+	if (exists $self -> YYData -> {'tags'} -> {$tag}) {
+		return $self -> YYData -> {'tags'} -> {$tag};
 	}
 
 	$self -> _add_error(_ERR_TAG_NOT_FOUND, $tag);
@@ -225,12 +225,12 @@ sub _add_error {
 	}
 	$msg =~ s/_ERROR_//g;
 
-	unshift @{$self -> {'MALYP'} -> {'errors'}}, $msg;
+	unshift @{$self -> YYData -> {'errors'}}, $msg;
 }
 
 sub get_errors {
 	my $self = shift;
-	return $self -> {'MALYP'} -> {'errors'};
+	return $self -> YYData -> {'errors'};
 }
 
 # ============================================================================
