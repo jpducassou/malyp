@@ -157,7 +157,7 @@ sub process {
 		} elsif (ref $input eq 'IO' or ref $input eq 'GLOB') {
 			$input_fh = $input;
 		} else {
-			croak 'Unrecognized REF for input';
+			croak 'Unrecognized REF for input: ' . ref $input;
 		}
 	} else {
 		# It's a filename
@@ -170,10 +170,10 @@ sub process {
 		if (ref $output) {
 			if ( ref $output eq 'SCALAR') {
 				$output_fh = IO::String -> new($$output);
-			} elsif (ref $output eq 'IO' or ref $output eq 'GLOB') {
+			} elsif (ref($output) =~ '^IO::' or ref($output) eq 'GLOB') {
 				$output_fh = $output;
 			} else {
-				croak 'Unrecognized REF for output';
+				croak 'Unrecognized REF for output: ' . ref $output;
 			}
 		} else {
 			# It's a filename

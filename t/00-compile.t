@@ -58,6 +58,14 @@ $parser -> process(\$input, \$output);
 is($output, $expected, 'ac++ split in two lines');
 
 # ==========================================================================
+$input    = 'ac := ac + 1;';
+$expected = '0  0 0  0 0  0 0  0  0  0  0  1  0 0 0 1  0 0 0 1  0 1 1 0  0 0 0 0 0 0 0 0';
+$output   = '';
+open my $output_fh ,  '>', \$output or fail 'Cannot open output buffer';
+$parser -> process(\$input, $output_fh);
+is($output, $expected, 'ac++ with direct string and IO::String output');
+
+# ==========================================================================
 # Basic test as binary
 # ==========================================================================
 $parser -> want_binary();
