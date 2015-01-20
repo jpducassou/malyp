@@ -1,16 +1,17 @@
 
 # Token declarations:
-%token  PLUS AND NOT
-%token	LSHIFT RSHIFT
-%token	EQ SEMICOLON
-%token	COMMENT
-%token	PLEFT PRIGHT
-%token	JMPZ JMPN JMPA
-%token	AC SP IR TIR ZERO ONE _ONE AMASK SMASK A B C D E F
-%token	ALU MAR MBR
+%token PLUS AND NOT
+%token LSHIFT RSHIFT
+%token EQ SEMICOLON
+%token COMMENT
+%token PLEFT PRIGHT
+%token JMPZ JMPN JMPA
+%token AC SP IR TIR ZERO ONE _ONE AMASK SMASK A B C D E F
+%token ALU MAR MBR
+%token LINENUM
 
 # Starting production rule
-%start	main
+%start main
 
 %{
 
@@ -44,27 +45,27 @@ use constant {
 # bus mic offset
 use constant {
 
-	BUS_A => 2**8,	# 256
-	BUS_B => 2**12,	# 4096
-	BUS_C => 2**16,	# 65536
+	BUS_A    => 2**8,  # 256
+	BUS_B    => 2**12, # 4096
+	BUS_C    => 2**16, # 65536
 
-	BIT_ENC	=> 2**20,
-	BIT_WR	=> 2**21,
-	BIT_RD	=> 2**22,
-	BIT_MAR	=> 2**23,
-	BIT_MBR	=> 2**24,
+	BIT_ENC  => 2**20,
+	BIT_WR   => 2**21,
+	BIT_RD   => 2**22,
+	BIT_MAR  => 2**23,
+	BIT_MBR  => 2**24,
 
-	SH_R => 2**25,
-	SH_L => 2**26,
+	SH_R     => 2**25,
+	SH_L     => 2**26,
 
 	ALU_PLUS => 0,
-	ALU_AND => 2**27,
-	ALU_IDD => 2**28,
-	ALU_NOT => 3 * (2**27),
+	ALU_AND  => 2**27,
+	ALU_IDD  => 2**28,
+	ALU_NOT  => 3 * (2**27),
 
-	COND_N => 2**29,
-	COND_Z => 2**30,
-	COND_A => 3 * (2**29),
+	COND_N   => 2**29,
+	COND_Z   => 2**30,
+	COND_A   => 3 * (2**29),
 
 	BIT_AMUX => 2**31
 
@@ -77,8 +78,10 @@ use constant {
 %%
 
 main:
-	sent_list         { $_[0] -> _line($_[1]) } |
-	sent_list COMMENT { $_[0] -> _line($_[1]) }
+	sent_list                 { $_[0] -> _line($_[1]) } |
+	sent_list COMMENT         { $_[0] -> _line($_[1]) } |
+	LINENUM sent_list         { $_[0] -> _line($_[2]) } |
+	LINENUM sent_list COMMENT { $_[0] -> _line($_[2]) }
 ;
 
 sent_list:
@@ -289,6 +292,7 @@ sub _lexer {
 		# ========================================================================
 		s/^(\=|\:\=)\s*//i                   && return('EQ',        $1);
 		s/^(\;)\s*//i                        && return('SEMICOLON', $1);
+		s/^(\d+:)\s*//i                      && return('LINENUM',   $1);
 
 		# Shifts =================================================================
 		s/^(LSHIFT)\s*//i                    && return('LSHIFT',    $1);
