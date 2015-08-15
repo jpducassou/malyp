@@ -27,7 +27,7 @@ while($file_name = glob 't/data/*.in') {
 	open my $expected_fh, '<',  "$file_name.out" or die "Cannot open $file_name.out for reading";
 
 	$parser -> process("$file_name.in", $output_fh);
-	diag Dumper($parser -> get_errors());
+	diag Dumper($parser -> get_errors()) if $parser -> get_errors();
 	my $i = 1;
 
 	while (my $expected = <$expected_fh>) {

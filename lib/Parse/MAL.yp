@@ -9,6 +9,7 @@
 %token AC SP IR TIR ZERO ONE _ONE AMASK SMASK A B C D E F
 %token ALU MAR MBR
 %token LINENUM
+%token EOL
 
 # Starting production rule
 %start main
@@ -78,6 +79,15 @@ use constant {
 %%
 
 main:
+	line_list
+;
+
+line_list:
+	line EOL line_list |
+	line
+;
+
+line:
 	sent_list                 { $_[0] -> _line($_[1]) } |
 	sent_list COMMENT         { $_[0] -> _line($_[1]) } |
 	LINENUM sent_list         { $_[0] -> _line($_[2]) } |
@@ -85,7 +95,8 @@ main:
 ;
 
 sent_list:
-	sent SEMICOLON sent_list { $_[1] | $_[3] } | { 0 }
+	sent SEMICOLON sent_list { $_[1] | $_[3] } |
+	{ 0 }
 ;
 
 sent:
@@ -145,12 +156,10 @@ sent_jmp:
 %%
 
 # ============================================================================
+sub set_input {
 
-sub process {
+	my ($self, $input) = @_;
 
-	my ($self, $input, $output) = @_;
-
-	# INPUT selection
 	croak 'Input not set!' unless $input;
 
 	my $input_fh;
@@ -167,7 +176,14 @@ sub process {
 		open($input_fh, '<', $input) or croak "Cannot open file $input for reading!";
 	}
 
-	# OUTPUT selection
+	$self -> YYData -> {'INPUT_HANDLE'}  = $input_fh;
+
+}
+
+sub set_output {
+
+	my ($self, $output) = @_;
+
 	my $output_fh;
 	if ($output) {
 		if (ref $output) {
@@ -186,8 +202,21 @@ sub process {
 		$output_fh = \*STDOUT;
 	}
 
-	$self -> YYData -> {'INPUT_HANDLE'}  = $input_fh;
 	$self -> YYData -> {'OUTPUT_HANDLE'} = $output_fh;
+
+}
+
+sub process {
+
+	my ($self, $input, $output) = @_;
+
+	# INPUT selection
+	$self -> set_input($input);
+
+	# OUTPUT selection
+	$self -> set_output($output);
+
+	# Reset current line
 	$self -> YYData -> {'INPUT_LINE'}    = '';
 
 	# Reset errors from previous runs:
@@ -198,7 +227,7 @@ sub process {
 
 	# Do the job:
 	return $self -> YYParse(
-		yylex   => \&_lexer,
+		yylex   => \&lexer,
 		yyerror => \&_error,
 		yydebug => 0x00
 	);
@@ -259,11 +288,9 @@ sub get_tag {
 
 sub _add_error {
 
-	my $self = shift;
+	my ($self, $msg, @stubs) = @_;
 
-	my $msg = shift;
-
-	while (my $val = shift) {
+	while (my $val = shift @stubs)  {
 		$msg =~ s/_ERROR_/'$val'/;
 	}
 	$msg =~ s/_ERROR_//g;
@@ -278,7 +305,7 @@ sub get_errors {
 
 # ============================================================================
 
-sub _lexer {
+sub lexer {
 
 	my ($self) = @_;
 
@@ -287,12 +314,19 @@ sub _lexer {
 	for ( $self -> YYData -> {'INPUT_LINE'} or ($self -> YYData -> {'INPUT_LINE'} = <$io_handle>) ) {
 
 		$self -> YYData -> {'INPUT_LINE'} or return('', undef);
-		s/^([\s\t\n\r]*)//; # tabs, spaces, etc discarded
+
+		# ========================================================================
+		# For debugging purposes:
+		$self -> _add_error("> INPUT: $_");
+
+		# ========================================================================
+		s/^([\s\t]*)//; # tabs, spaces, etc discarded
 
 		# ========================================================================
 		s/^(\=|\:\=)\s*//i                   && return('EQ',        $1);
-		s/^(\;)\s*//i                        && return('SEMICOLON', $1);
-		s/^(\d+:)\s*//i                      && return('LINENUM',   $1);
+		s/^(\;) *//i                         && return('SEMICOLON', $1);
+		s/^(\d+):\s*//i                      && return('LINENUM',   $1);
+		s/^([\r\n]+)\s*//i                   && return('EOL',       $1);
 
 		# Shifts =================================================================
 		s/^(LSHIFT)\s*//i                    && return('LSHIFT',    $1);
