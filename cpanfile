@@ -1,5 +1,6 @@
 # Dependencies:
 requires 'Parse::Yapp';
+requires 'IO::String';
 
 # Testing
 on 'test' => sub {
