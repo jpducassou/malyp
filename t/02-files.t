@@ -27,7 +27,7 @@ while (my $file_name = glob 't/data/*.in') {
 	open $output_fh ,  '<', \$output_buffer  or die 'Cannot open output buffer';
 	my $i = 1;
 
-	while ((my $expected = <$expected_fh>) and (my $output = <$output_fh>)) {
+	while (defined(my $expected = <$expected_fh>) and defined(my $output = <$output_fh>)) {
 		chomp $expected;
 		chomp $output;
 		is($output, $expected, 'file: ' . $file_name . ' line: ' . $i++);
