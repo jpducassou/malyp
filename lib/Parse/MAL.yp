@@ -249,6 +249,9 @@ sub _line {
 		$line_value = $self -> sentence_as_string($line_value);
 	}
 	print $output_fh $line_value;
+	unless ($self -> YYData -> {'WANT_BINARY'}) {
+		print $output_fh "\n";
+	}
 	return;
 
 }
