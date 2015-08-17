@@ -16,8 +16,6 @@ my $directory = 't/data';
 while (my $file_name = glob 't/data/*.in') {
 
 	$file_name =~ s/\.in$//;
-	diag "Testing $file_name ...";
-
 	my $output_buffer = '';
 
 	open my $output_fh ,  '>', \$output_buffer  or die 'Cannot open output buffer';
