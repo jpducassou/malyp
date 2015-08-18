@@ -157,20 +157,22 @@ sub set_input {
 
 	my ($self, $input) = @_;
 
-	croak 'Input not set!' unless $input;
-
 	my $input_fh;
-	if (ref $input) {
-		if ( ref $input eq 'SCALAR') {
-			open($input_fh, '<', $input) or croak 'Cannot open string ref for reading!';
-		} elsif (ref $input eq 'IO' or ref $input eq 'GLOB') {
-			$input_fh = $input;
+	if ($input) {
+		if (ref $input) {
+			if ( ref $input eq 'SCALAR') {
+				open($input_fh, '<', $input) or croak 'Cannot open string ref for reading!';
+			} elsif (ref $input eq 'IO' or ref $input eq 'GLOB') {
+				$input_fh = $input;
+			} else {
+				croak 'Unrecognized REF for input: ' . ref $input;
+			}
 		} else {
-			croak 'Unrecognized REF for input: ' . ref $input;
+			# It's a filename
+			open($input_fh, '<', $input) or croak "Cannot open file $input for reading!";
 		}
 	} else {
-		# It's a filename
-		open($input_fh, '<', $input) or croak "Cannot open file $input for reading!";
+		$input_fh = \*STDIN;
 	}
 
 	$self -> YYData -> {'INPUT_HANDLE'}  = $input_fh;
