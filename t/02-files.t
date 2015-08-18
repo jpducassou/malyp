@@ -6,7 +6,7 @@ use warnings;
 
 # ============================================================================
 use Test::More;
-use Parse::MAL;
+use CPU::Mic1::Microassembler;
 use Data::Dumper;
 
 # ============================================================================
@@ -21,7 +21,7 @@ while (my $file_name = glob 't/data/*.in') {
 	open my $output_fh ,  '>', \$output_buffer  or die 'Cannot open output buffer';
 	open my $expected_fh, '<', "$file_name.out" or die "Cannot open $file_name.out for reading";
 
-	my $parser = Parse::MAL -> new();
+	my $parser = CPU::Mic1::Microassembler -> new();
 	$parser -> process("$file_name.in", $output_fh);
 
 	open $output_fh ,  '<', \$output_buffer  or die 'Cannot open output buffer';

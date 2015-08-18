@@ -5,12 +5,12 @@ use strict;
 use warnings;
 
 # ============================================================================
-use Parse::MAL;
+use CPU::Mic1::Microassembler;
 
 # ============================================================================
 sub main {
 
-	my $parser = Parse::MAL -> new();
+	my $parser = CPU::Mic1::Microassembler -> new();
 	$parser -> process();
 
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # ============================================================================
 use strict;
@@ -8,9 +8,9 @@ use warnings;
 use Parse::Yapp;
 
 # ============================================================================
-my $filename = 'lib/Parse/MAL.yp';
-my $outfile  = 'lib/Parse/MAL.pm';
-my $package  = 'Parse::MAL';
+my $filename = 'lib/CPU/Mic1/Microassembler.yp';
+my $outfile  = 'lib/CPU/Mic1/Microassembler.pm';
+my $package  = 'CPU::Mic1::Microassembler';
 
 my $parser = new Parse::Yapp(inputfile => $filename);
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # ============================================================================
 use strict;
@@ -9,16 +9,16 @@ use ExtUtils::MakeMaker;
 
 # ============================================================================
 WriteMakefile(
-	'NAME'           => 'Parse::MAL',
-	'VERSION_FROM'   => 'lib/Parse/MAL.yp',
-	'ABSTRACT_FROM'  => 'lib/Parse/MAL.yp',
+	'NAME'           => 'CPU::Mic1::Microassembler',
+	'VERSION_FROM'   => 'lib/CPU/Mic1/Microassembler.yp',
+	'ABSTRACT_FROM'  => 'lib/CPU/Mic1/Microassembler.yp',
 	'AUTHOR'         => 'Jean Pierre Ducassou <jpducassou@gmail.com>',
 	'LICENSE'        => 'perl',
 	'BUILD_REQUIRES' => { 'Parse::Yapp' => 0 },
 	'PREREQ_PM'      => { 'Parse::Yapp' => 0 },
-	'PL_FILES'       => { 'yp_to_pm.PL' => 'lib/Parse/MAL.pm' },
-	'PM'             => { 'lib/Parse/MAL.pm' => '$(INST_LIBDIR)/Parse/MAL.pm' },
-	'EXE_FILES'      => [ 'bin/mal' ],
+	'PL_FILES'       => { 'yp_to_pm.PL' => 'lib/CPU/Mic1/Microassembler.pm' },
+	'PM'             => { 'lib/CPU/Mic1/Microassembler.pm' => '$(INST_LIBDIR)/CPU/Mic1/Microassembler.pm' },
+	'EXE_FILES'      => [ 'bin/asm' ],
 );
 
 # ============================================================================

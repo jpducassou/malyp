@@ -8,16 +8,16 @@ use warnings;
 use Test::More; # tests => 6;
 
 # ==========================================================================
-BEGIN { use_ok( 'Parse::MAL' ); }
+BEGIN { use_ok( 'CPU::Mic1::Microassembler' ); }
 
 # ==========================================================================
-can_ok('Parse::MAL', 'new');
+can_ok('CPU::Mic1::Microassembler', 'new');
 
 # ==========================================================================
-my $parser = Parse::MAL -> new();
+my $parser = CPU::Mic1::Microassembler -> new();
 
 # ==========================================================================
-isa_ok($parser, 'Parse::MAL');
+isa_ok($parser, 'CPU::Mic1::Microassembler');
 isa_ok($parser, 'Parse::Yapp::Driver');
 
 # ==========================================================================

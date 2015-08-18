@@ -8,10 +8,10 @@ use warnings;
 use Test::More; # tests => 6;
 
 # ==========================================================================
-BEGIN { use_ok( 'Parse::MAL' ); }
+BEGIN { use_ok( 'CPU::Mic1::Microassembler' ); }
 
 # ==========================================================================
-can_ok('Parse::MAL', 'sentence_as_string');
+can_ok('CPU::Mic1::Microassembler', 'sentence_as_string');
 
 # ==========================================================================
 my ($input, $expected);
@@ -19,12 +19,12 @@ my ($input, $expected);
 # ==========================================================================
 $input    = 0b00000000000100010001011000000000;
 $expected = '0  0 0  0 0  0 0  0  0  0  0  1  0 0 0 1  0 0 0 1  0 1 1 0  0 0 0 0 0 0 0 0';
-is(Parse::MAL -> sentence_as_string($input), $expected, 'ac++ with direct string');
+is(CPU::Mic1::Microassembler -> sentence_as_string($input), $expected, 'ac++ with direct string');
 
 # ==========================================================================
 $input    = 0b00100000000100010001011000000100;
 $expected = '0  0 1  0 0  0 0  0  0  0  0  1  0 0 0 1  0 0 0 1  0 1 1 0  0 0 0 0 0 1 0 0';
-is(Parse::MAL -> sentence_as_string($input), $expected, 'ac++ and goto with direct string');
+is(CPU::Mic1::Microassembler -> sentence_as_string($input), $expected, 'ac++ and goto with direct string');
 
 # ==========================================================================
 done_testing();

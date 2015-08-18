@@ -13,7 +13,7 @@
 *.new
 
 # Generated file
-lib/Parse/MAL.pm
+lib/CPU/Mic1/Microassembler.pm
 
 # Carton temp files
 /local/

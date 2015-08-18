@@ -463,29 +463,26 @@ __END__
 
 =head1 NAME
 
-Parse::MAL - micro assembly language parser and compiler
+CPU::Mic1::Microassembler - Mic1 micro assembly language parser and compiler
 
 =head1 SYNOPSIS
 
-	use Parse::MAL;
+	use CPU::Mic1::Microassembler;
 
 	# Create parser object:
-	my $parser = Parse::MAL -> new();
-
-	# Set tag map
-	$parser -> set_tags($tags);
+	my $parser = CPU::Mic1::Microassembler -> new();
 
 	# Process line
-	my $sentence = $parser -> run($line);
+	$parser -> process();
 
 =head1 DESCRIPTION
 
-Parse::MAL is an assembler that turns micro assembly language (MAL) into Mic-1 microinstructions.
+CPU::Mic1::Microassembler is an assembler that turns micro assembly language (MAL) into Mic-1 microinstructions.
 This program was designed for the Mic1 Microprogramming Simulator found in:
 http://cis.stvincent.edu/carlsond/cs330/mic1/mic1.html
 
 The process() method is called to process assembler input. The first parameter indicates the input as one of: a filename, if defined; a reference to a text string containing assembler text; or a file handle reference (e.g. IO::Handle or sub-class) or GLOB (e.g. \*STDIN), from which the input can be read.
-By default, the processed input's output is printed to STDOUT.
+By default, the processed output is printed to STDOUT.
 
 =head1 AUTHOR
 
