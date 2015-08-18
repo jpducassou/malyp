@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Set modules path
+if [ -z $PERL5LIB ]; then
+	export PERL5LIB="lib"
+fi
+
+# Set if coverage must be run
+name=`basename $0`
+if [ $name = "cover" ]; then
+	cover -delete
+	export PERL5OPT='-MDevel::Cover=+ignore,.t$,prove$'
+fi
+
+# Run tests
+# -w enable warnings
+# -v enable verbose output
+if [ $# -gt 0 ]; then
+	carton exec "prove -v -w -I \"$PERL5LIB\" \"$1\""
+else
+	carton exec "prove -w -I \"$PERL5LIB\" t/*.t"
+fi
+
+# Report coverage
+if [ $name = "cover" ]; then
+	export PERL5OPT=
+	cover -ignore ^t -report Html
+fi
+

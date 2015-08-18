@@ -1,5 +1,5 @@
 # Dependencies:
-requires 'Parse::Yapp', 1.05;
+requires 'Parse::Yapp';
 
 # Testing
 on 'test' => sub {

@@ -1,17 +1,18 @@
 
 # Token declarations:
-%token  PLUS AND NOT
-%token	LSHIFT RSHIFT
-%token	EQ SEMICOLON
-%token	COMMENT
-%token	TAG
-%token	PLEFT PRIGHT
-%token	JMPZ JMPN JMPA
-%token	AC SP IR TIR ZERO ONE _ONE AMASK SMASK A B C D E F
-%token	ALU MAR MBR
+%token PLUS AND NOT
+%token LSHIFT RSHIFT
+%token EQ SEMICOLON
+%token COMMENT
+%token PLEFT PRIGHT
+%token JMPZ JMPN JMPA
+%token AC SP IR TIR ZERO ONE _ONE AMASK SMASK A B C D E F
+%token ALU MAR MBR
+%token LINENUM
+%token EOL
 
 # Starting production rule
-%start	main
+%start main
 
 %{
 
@@ -19,6 +20,7 @@
 
 # USE ========================================================================
 use warnings;
+use Carp;
 
 # ============================================================================
 our $VERSION = '1.00';
@@ -41,27 +43,27 @@ use constant {
 # bus mic offset
 use constant {
 
-	BUS_A => 2**8,	# 256
-	BUS_B => 2**12,	# 4096
-	BUS_C => 2**16,	# 65536
+	BUS_A    => 2**8,  # 256
+	BUS_B    => 2**12, # 4096
+	BUS_C    => 2**16, # 65536
 
-	BIT_ENC	=> 2**20,
-	BIT_WR	=> 2**21,
-	BIT_RD	=> 2**22,
-	BIT_MAR	=> 2**23,
-	BIT_MBR	=> 2**24,
+	BIT_ENC  => 2**20,
+	BIT_WR   => 2**21,
+	BIT_RD   => 2**22,
+	BIT_MAR  => 2**23,
+	BIT_MBR  => 2**24,
 
-	SH_R => 2**25,
-	SH_L => 2**26,
+	SH_R     => 2**25,
+	SH_L     => 2**26,
 
 	ALU_PLUS => 0,
-	ALU_AND => 2**27,
-	ALU_IDD => 2**28,
-	ALU_NOT => 3 * (2**27),
+	ALU_AND  => 2**27,
+	ALU_IDD  => 2**28,
+	ALU_NOT  => 3 * (2**27),
 
-	COND_N => 2**29,
-	COND_Z => 2**30,
-	COND_A => 3 * (2**29),
+	COND_N   => 2**29,
+	COND_Z   => 2**30,
+	COND_A   => 3 * (2**29),
 
 	BIT_AMUX => 2**31
 
@@ -74,12 +76,24 @@ use constant {
 %%
 
 main:
-	sent_list |
-	sent_list COMMENT
+	line_list
+;
+
+line_list:
+	line EOL line_list |
+	line
+;
+
+line:
+	sent_list                 { $_[0] -> _line($_[1]) } |
+	sent_list COMMENT         { $_[0] -> _line($_[1]) } |
+	LINENUM sent_list         { $_[0] -> _line($_[2]) } |
+	LINENUM sent_list COMMENT { $_[0] -> _line($_[2]) }
 ;
 
 sent_list:
-	sent SEMICOLON sent_list { $_[1] | $_[3] } | { 0 }
+	sent SEMICOLON sent_list { $_[1] | $_[3] } |
+	{ 0 }
 ;
 
 sent:
@@ -131,31 +145,88 @@ sent_io:
 ;
 
 sent_jmp:
-	JMPZ TAG { COND_Z | $_[0] -> getTag($_[2]) } |
-	JMPN TAG { COND_N | $_[0] -> getTag($_[2]) } |
-	JMPA TAG { COND_A | $_[0] -> getTag($_[2]) }
+	JMPZ { COND_Z | $_[1] } |
+	JMPN { COND_N | $_[1] } |
+	JMPA { COND_A | $_[1] }
 ;
 
 %%
 
 # ============================================================================
+sub set_input {
 
-sub run {
+	my ($self, $input) = @_;
 
-	my $self = shift;
-	my $data = shift;
+	my $input_fh;
+	if ($input) {
+		if (ref $input) {
+			if ( ref $input eq 'SCALAR') {
+				open($input_fh, '<', $input) or croak 'Cannot open string ref for reading!';
+			} elsif (ref $input eq 'IO' or ref $input eq 'GLOB') {
+				$input_fh = $input;
+			} else {
+				croak 'Unrecognized REF for input: ' . ref $input;
+			}
+		} else {
+			# It's a filename
+			open($input_fh, '<', $input) or croak "Cannot open file $input for reading!";
+		}
+	} else {
+		$input_fh = \*STDIN;
+	}
 
-	$self -> YYData -> {INPUT} = $data if $data;
+	$self -> YYData -> {'INPUT_HANDLE'}  = $input_fh;
+
+}
+
+sub set_output {
+
+	my ($self, $output) = @_;
+
+	my $output_fh;
+	if ($output) {
+		if (ref $output) {
+			if ( ref $output eq 'SCALAR') {
+				open ($output_fh, '>', $output) or croak 'Cannot open string ref for writing!';
+			} elsif (ref($output) =~ '^IO::' or ref($output) eq 'GLOB') {
+				$output_fh = $output;
+			} else {
+				croak 'Unrecognized REF for output: ' . ref $output;
+			}
+		} else {
+			# It's a filename
+			open($output_fh, '>', $output) or croak "Cannot open file $output for writing!";
+		}
+	} else {
+		$output_fh = \*STDOUT;
+	}
+
+	$self -> YYData -> {'OUTPUT_HANDLE'} = $output_fh;
+
+}
+
+sub process {
+
+	my ($self, $input, $output) = @_;
+
+	# INPUT selection
+	$self -> set_input($input);
+
+	# OUTPUT selection
+	$self -> set_output($output);
+
+	# Reset current line
+	$self -> YYData -> {'INPUT_LINE'} = undef;
 
 	# Reset errors from previous runs:
-	$self -> {'MALYP'} -> {'errors'} = [];
+	$self -> YYData -> {'errors'} = [];
 
 	# And reset tags too:
-	$self -> {'MALYP'} -> {'tags'} = {};
+	$self -> YYData -> {'tags'} = {};
 
 	# Do the job:
 	return $self -> YYParse(
-		yylex   => \&_lexer,
+		yylex   => \&lexer,
 		yyerror => \&_error,
 		yydebug => 0x00
 	);
@@ -169,64 +240,95 @@ sub run {
 	# 0x10         Error Recovery tracing
 	# To have a full debugging ouput, use
 	# debug => 0x1F
+
+}
+
+sub _line {
+
+	my ($self, $line_value) = @_;
+	my $output_fh = $self -> YYData -> {'OUTPUT_HANDLE'};
+	unless ($self -> YYData -> {'WANT_BINARY'}) {
+		$line_value = $self -> sentence_as_string($line_value);
+	}
+	print $output_fh $line_value;
+	unless ($self -> YYData -> {'WANT_BINARY'}) {
+		print $output_fh "\n";
+	}
+	return;
+
+}
+
+sub want_binary {
+
+	my ($self) = @_;
+	$self -> YYData -> {'WANT_BINARY'} = 1;
+
 }
 
 sub set_tags {
 
-	my $self = shift;
+	my ($self) = @_;
 
-	$self -> {'MALYP'} -> {'tags'} = shift;
+	$self -> YYData -> {'tags'} = shift;
 
 }
 
 sub get_tag {
 
-	my $self = shift;
+	my ($self, $tag) = @_;
 
-	my $tag = shift;
+	return $tag if ($tag =~ /^\d+$/);
 
-	if (exists $self -> {'MALYP'} -> {'tags'} -> {$tag}) {
-		return $self -> {'MALYP'} -> {'tags'} -> {$tag};
-	} else {
-		$self -> _add_error(_ERR_TAG_NOT_FOUND, $tag);
-		return 0;
+	if (exists $self -> YYData -> {'tags'} -> {$tag}) {
+		return $self -> YYData -> {'tags'} -> {$tag};
 	}
+
+	$self -> _add_error(_ERR_TAG_NOT_FOUND, $tag);
+	return 0;
+
 }
 
 sub _add_error {
 
-	my $self = shift;
+	my ($self, $msg, @stubs) = @_;
 
-	my $msg = shift;
-
-	while (my $val = shift) {
+	while (my $val = shift @stubs)  {
 		$msg =~ s/_ERROR_/'$val'/;
 	}
 	$msg =~ s/_ERROR_//g;
 
-	unshift @{$self -> {'MALYP'} -> {'errors'}}, $msg;
+	unshift @{$self -> YYData -> {'errors'}}, $msg;
 }
 
 sub get_errors {
 	my $self = shift;
-	return $self -> {'MALYP'} -> {'errors'};
+	return $self -> YYData -> {'errors'};
 }
 
 # ============================================================================
 
-sub _lexer {
+sub lexer {
 
-	my $self = shift;
+	my ($self) = @_;
 
-	$self -> YYData -> {INPUT} or return('', undef);
+	# ==========================================================================
+	my $io_handle = $self -> YYData -> {'INPUT_HANDLE'};
 
-	for ( $self -> YYData -> {INPUT} ) {
+	# ==========================================================================
+	for ( $self -> YYData -> {'INPUT_LINE'} or ($self -> YYData -> {'INPUT_LINE'} = <$io_handle>) or return('', undef) ) {
 
-		s/^([\s\t\n\r]*)//; # tabs, spaces, etc discarded
+		# ========================================================================
+		s/^([\r\n]+)\s*//i                   && return('EOL',       $1);
+
+		# ========================================================================
+		s/^[\s\t]*//; # tabs and spaces are discarded
+
+		# ========================================================================
+		s/^(\d+):\s*//i                      && return('LINENUM',   $1);
+		s/^(\;) *//i                         && return('SEMICOLON', $1);
 
 		# ========================================================================
 		s/^(\=|\:\=)\s*//i                   && return('EQ',        $1);
-		s/^(\;)\s*//i                        && return('SEMICOLON', $1);
 
 		# Shifts =================================================================
 		s/^(LSHIFT)\s*//i                    && return('LSHIFT',    $1);
@@ -237,12 +339,12 @@ sub _lexer {
 		s/^(WR)\s*//i                        && return('WR',        $1);
 
 		# Jumps ==================================================================
-		s/^(JMPZ)\s*//i                      && return('JMPZ',      $1);
-		s/^(IF\s+Z\s+THEN\s+GOTO)\s*//i      && return('JMPZ',      $1);
-		s/^(JMPN)\s*//i                      && return('JMPN',      $1);
-		s/^(IF\s+N\s+THEN\s+GOTO)\s*//i      && return('JMPN',      $1);
-		s/^(JMPA)\s*//i                      && return('JMPA',      $1);
-		s/^(GOTO)\s*//i                      && return('JMPA',      $1);
+		s/^(JMPZ)\s*(\d+)\s*//i                 && return('JMPZ',   $2);
+		s/^(IF\s+Z\s+THEN\s+GOTO)\s*(\d+)\s*//i && return('JMPZ',   $2);
+		s/^(JMPN)\s*(\d+)\s*//i                 && return('JMPN',   $2);
+		s/^(IF\s+N\s+THEN\s+GOTO)\s*(\d+)\s*//i && return('JMPN',   $2);
+		s/^(JMPA)\s*(\d+)\s*//i                 && return('JMPA',   $2);
+		s/^(GOTO)\s*(\d+)\s*//i                 && return('JMPA',   $2);
 
 		# Logical operators ======================================================
 		s/^(NOT|NO|INV)\s*//i                && return('NOT',       $1);
@@ -274,26 +376,28 @@ sub _lexer {
 		s/^(E)\s*//i                         && return('E',         14);
 		s/^(F)\s*//i                         && return('F',         15);
 
-		# Strings ================================================================
-		s/^[\<]\s*(\w+)\s*[\>]//             && return('TAG',       $1);
+		# Comments ===============================================================
 		s/^[\{]\s*(.*?)[\}]//                && return('COMMENT',   $1);
 		s/^\#\s*(.*)$//i                     && return('COMMENT',   $1);
 
 		# If could not recognize a token and there is still something to read
 		# there is an error in the expression
-		my $input = $self -> YYData -> {INPUT};
-		if ($input) { $self -> _add_error( _ERR_UNRECOGNISED_EXPRESION, $input); }
+		$self -> _add_error( _ERR_UNRECOGNISED_EXPRESION, $_) if $_;
 
 		# As mentioned in the Parse::Yacc help
 		# we should return ('', undef) at the end
 		return('', undef);
 
-	}
+	} # for
+
+	# EOF
+	return('', undef);
+
 }
 
 sub _error {
 
-	my $self = shift;
+	my ($self) = @_;
 
 	# Token read:
 	my $token = $self -> YYCurtok;
@@ -319,6 +423,35 @@ sub _error {
 	};
 
 }
+
+sub sentence_as_string {
+
+	my ($self, $sentence) = @_;
+
+	my $strbin = sprintf '%032b', $sentence;
+	my $strpp = '';
+
+	$strpp .= substr( $strbin, 0,  1 ) . ' '; # AMUX
+	$strpp .= substr( $strbin, 1,  2 ) . ' '; # COND
+	$strpp .= substr( $strbin, 3,  2 ) . ' '; # ALU
+	$strpp .= substr( $strbin, 5,  2 ) . ' '; # SH
+	$strpp .= substr( $strbin, 7,  1 ) . ' '; # MBR
+	$strpp .= substr( $strbin, 8,  1 ) . ' '; # MAR
+	$strpp .= substr( $strbin, 9,  1 ) . ' '; # RD
+	$strpp .= substr( $strbin, 10, 1 ) . ' '; # WR
+	$strpp .= substr( $strbin, 11, 1 ) . ' '; # ENC
+	$strpp .= substr( $strbin, 12, 4 ) . ' '; # C
+	$strpp .= substr( $strbin, 16, 4 ) . ' '; # B
+	$strpp .= substr( $strbin, 20, 4 ) . ' '; # A
+	$strpp .= substr( $strbin, 24, 8 ) . ' '; # ADDR
+
+	$strpp =~ s/(\d)/$1 /g;
+	$strpp =~ s/\s*$//;
+
+	return $strpp;
+
+}
+
 
 # ============================================================================
 
@@ -350,6 +483,9 @@ Parse::MAL - micro assembly language parser and compiler
 Parse::MAL is an assembler that turns micro assembly language (MAL) into Mic-1 microinstructions.
 This program was designed for the Mic1 Microprogramming Simulator found in:
 http://cis.stvincent.edu/carlsond/cs330/mic1/mic1.html
+
+The process() method is called to process assembler input. The first parameter indicates the input as one of: a filename, if defined; a reference to a text string containing assembler text; or a file handle reference (e.g. IO::Handle or sub-class) or GLOB (e.g. \*STDIN), from which the input can be read.
+By default, the processed input's output is printed to STDOUT.
 
 =head1 AUTHOR
 
