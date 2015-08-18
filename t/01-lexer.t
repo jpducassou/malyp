@@ -8,16 +8,16 @@ use warnings;
 use Test::More; # tests => 6;
 
 # ==========================================================================
-BEGIN { use_ok( 'Parse::MAL' ); }
+BEGIN { use_ok( 'CPU::Mic1::Microassembler' ); }
 
 # ==========================================================================
-can_ok('Parse::MAL', 'new');
+can_ok('CPU::Mic1::Microassembler', 'new');
 
 # ==========================================================================
-my $parser = Parse::MAL -> new();
+my $parser = CPU::Mic1::Microassembler -> new();
 
 # ==========================================================================
-isa_ok($parser, 'Parse::MAL');
+isa_ok($parser, 'CPU::Mic1::Microassembler');
 isa_ok($parser, 'Parse::Yapp::Driver');
 
 # ==========================================================================
@@ -28,7 +28,7 @@ can_ok($parser, 'set_input');
 my ($input, @output, $expected);
 
 # ==========================================================================
-$parser = Parse::MAL -> new();
+$parser = CPU::Mic1::Microassembler -> new();
 $input    = 'ac := ac + 1;';
 $expected = [
 	['AC', '1'],
@@ -48,7 +48,7 @@ foreach my $expected_token (@$expected) {
 }
 
 # ==========================================================================
-$parser = Parse::MAL -> new();
+$parser = CPU::Mic1::Microassembler -> new();
 $input    = 'ac := ac + 1; if n then goto 4;';
 $expected = [
 	['AC', '1'],
@@ -70,7 +70,7 @@ foreach my $expected_token (@$expected) {
 }
 
 # ==========================================================================
-$parser = Parse::MAL -> new();
+$parser = CPU::Mic1::Microassembler -> new();
 $input    = "0: mar := f; rd;\n1: rd;\n";
 $expected = [
 	['LINENUM', '0'],
