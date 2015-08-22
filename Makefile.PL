@@ -12,7 +12,7 @@ WriteMakefile(
 	'NAME'           => 'CPU::Mic1::Microassembler',
 	'VERSION_FROM'   => 'lib/CPU/Mic1/Microassembler.yp',
 	'ABSTRACT_FROM'  => 'lib/CPU/Mic1/Microassembler.yp',
-	'AUTHOR'         => 'Jean Pierre Ducassou <jpducassou@gmail.com>',
+	'AUTHOR'         => 'Jean Pierre Ducassou',
 	'LICENSE'        => 'perl',
 	'BUILD_REQUIRES' => { 'Parse::Yapp' => 0 },
 	'PREREQ_PM'      => { 'Parse::Yapp' => 0 },
