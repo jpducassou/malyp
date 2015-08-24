@@ -17,7 +17,7 @@ WriteMakefile(
 	'BUILD_REQUIRES' => { 'Parse::Yapp' => 0, 'Test::More' => 0 },
 	'PREREQ_PM'      => { 'Parse::Yapp' => 0 },
 	'PL_FILES'       => { 'yp_to_pm.PL' => 'lib/CPU/Mic1/Microassembler.pm' },
-	'PM'             => { 'lib/CPU/Mic1/Microassembler.pm' => '$(INST_LIBDIR)/CPU/Mic1/Microassembler.pm' },
+	'PM'             => { 'lib/CPU/Mic1/Microassembler.pm' => '$(INST_LIBDIR)/Microassembler.pm' },
 	'EXE_FILES'      => [ 'bin/asm' ],
 );
 
