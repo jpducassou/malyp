@@ -17,16 +17,16 @@ my $parser = new Parse::Yapp(inputfile => $filename);
 my $warnings = $parser -> Warnings();
 $warnings and print STDERR $warnings;
 
-open(OUT, '>', $outfile) or die "Cannot open $outfile for writing.\n";
+open(my $output, '>', $outfile) or die "Cannot open $outfile for writing.\n";
 
-print OUT $parser -> Output(
-	classname    => $package,
-	template     => undef,
-	standalone   => 0,
-	linenumbers  => 0,
+print $output $parser -> Output(
+	'classname'    => $package,
+	'template'     => undef,
+	'standalone'   => 0,
+	'linenumbers'  => 0,
 );
 
-close(OUT);
+close ($output);
 
 # ============================================================================
 
