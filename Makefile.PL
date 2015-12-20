@@ -16,7 +16,7 @@ WriteMakefile(
 	'VERSION_FROM'       => 'lib/CPU/Mic1/Microassembler.yp',
 	'ABSTRACT_FROM'      => 'lib/CPU/Mic1/Microassembler.yp',
 	'AUTHOR'             => 'Jean Pierre Ducassou <jpducassou@gmail.com>',
-	'LICENSE'            => 'perl',
+	'LICENSE'            => 'perl_5',
 	'MIN_PERL_VERSION'   => 'v5.10.1',
 	'CONFIGURE_REQUIRES' => { 'ExtUtils::MakeMaker' => 0 },
 	'BUILD_REQUIRES'     => { 'Parse::Yapp' => 0, 'Test::More' => 0 },
