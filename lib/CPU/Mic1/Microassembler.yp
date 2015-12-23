@@ -169,6 +169,7 @@ sub set_input {
 	}
 
 	$self -> YYData -> {'INPUT_HANDLE'}  = $input_fh;
+	return;
 
 }
 
@@ -195,6 +196,7 @@ sub set_output {
 	}
 
 	$self -> YYData -> {'OUTPUT_HANDLE'} = $output_fh;
+	return;
 
 }
 
@@ -255,14 +257,15 @@ sub want_binary {
 
 	my ($self) = @_;
 	$self -> YYData -> {'WANT_BINARY'} = 1;
+	return;
 
 }
 
 sub set_tags {
 
 	my ($self) = @_;
-
 	$self -> YYData -> {'tags'} = shift;
+	return;
 
 }
 
@@ -291,6 +294,8 @@ sub _add_error {
 	$msg =~ s/_ERROR_//g;
 
 	unshift @{$self -> YYData -> {'errors'}}, $msg;
+	return;
+
 }
 
 sub get_errors {
@@ -414,6 +419,7 @@ sub _error {
 		delete $self -> YYData -> {ERRMSG};
 		return;
 	};
+	return;
 
 }
 
