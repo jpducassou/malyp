@@ -35,7 +35,7 @@ WriteMakefile(
 		},
 	},
 	'dist'               => { 'COMPRESS' => 'gzip -9f', 'SUFFIX' => 'gz' },
-	'clean'              => { 'FILES' => 'CPU-Mic1-Microassembler-*.tar.gz' },
+	'clean'              => { 'FILES'    => ['CPU-Mic1-Microassembler-*.tar.gz', 'lib/CPU/Mic1/Microassembler.pm' ] },
 );
 
 # ============================================================================
