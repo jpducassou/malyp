@@ -304,7 +304,6 @@ sub get_errors {
 }
 
 # ============================================================================
-
 sub lexer {
 
 	my ($self) = @_;
@@ -313,80 +312,85 @@ sub lexer {
 	my $io_handle = $self -> YYData -> {'INPUT_HANDLE'};
 
 	# ==========================================================================
-	for ( $self -> YYData -> {'INPUT_LINE'} or ($self -> YYData -> {'INPUT_LINE'} = <$io_handle>) or return('', undef) ) {
+	do {
+		while ( $self -> YYData -> {'INPUT_LINE'} ) {
 
-		# ========================================================================
-		s/^([\r\n]+)\s*//i                        && return('EOL',       $1);
+			# ========================================================================
+			next unless $self -> YYData -> {'INPUT_LINE'};
 
-		# ========================================================================
-		s/^[\s\t]*//; # tabs and spaces are discarded
+			# ========================================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^([\r\n]+)\s*//i && return('EOL',      $1);
 
-		# ========================================================================
-		s/^(\d+):\s*//i                           && return('LINENUM',   $1);
-		s/^(\;) *//i                              && return('SEMICOLON', $1);
+			# ========================================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^[\s\t]*//; # tabs and spaces are discarded
 
-		# ========================================================================
-		s/^(\=|\:\=)\s*//i                        && return('EQ',        $1);
+			# ========================================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(\d+):\s*//i   && return('LINENUM',   $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(\;) *//i      && return('SEMICOLON', $1);
 
-		# Shifts =================================================================
-		s/^(LSHIFT)\s*//i                         && return('LSHIFT',    $1);
-		s/^(RSHIFT)\s*//i                         && return('RSHIFT',    $1);
+			# ========================================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(\=|\:\=)\s*//i  && return('EQ',    $1);
 
-		# io =====================================================================
-		s/^(RD)\s*//i                             && return('RD',        $1);
-		s/^(WR)\s*//i                             && return('WR',        $1);
+			# Shifts =================================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(LSHIFT)\s*//i && return('LSHIFT',  $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(RSHIFT)\s*//i && return('RSHIFT',  $1);
 
-		# Jumps ==================================================================
-		s/^(JMPZ)\s*(\d+)\s*//i                   && return('JMPZ',      $2);
-		s/^(IF\s+Z\s+THEN\s+GOTO)\s*(\d+)\s*//i   && return('JMPZ',      $2);
-		s/^(JMPN)\s*(\d+)\s*//i                   && return('JMPN',      $2);
-		s/^(IF\s+N\s+THEN\s+GOTO)\s*(\d+)\s*//i   && return('JMPN',      $2);
-		s/^(JMPA)\s*(\d+)\s*//i                   && return('JMPA',      $2);
-		s/^(GOTO)\s*(\d+)\s*//i                   && return('JMPA',      $2);
+			# io =====================================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(RD)\s*//i     && return('RD',      $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(WR)\s*//i     && return('WR',      $1);
 
-		# Logical operators ======================================================
-		s/^(NOT|NO|INV)\s*//i                     && return('NOT',       $1);
-		s/^(AND|Y)\s*//i                          && return('AND',       $1);
-		s/^(\+)\s*//i                             && return('PLUS',      $1);
+			# Jumps ==================================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(JMPZ)\s*(\d+)\s*//i                 && return('JMPZ', $2);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(IF\s+Z\s+THEN\s+GOTO)\s*(\d+)\s*//i && return('JMPZ', $2);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(JMPN)\s*(\d+)\s*//i                 && return('JMPN', $2);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(IF\s+N\s+THEN\s+GOTO)\s*(\d+)\s*//i && return('JMPN', $2);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(JMPA)\s*(\d+)\s*//i                 && return('JMPA', $2);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(GOTO)\s*(\d+)\s*//i                 && return('JMPA', $2);
 
-		# Brackets ===============================================================
-		s/^([\(])\s*//                            && return('PLEFT',     $1);
-		s/^([\)])\s*//                            && return('PRIGHT',    $1);
+			# Logical operators ======================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(NOT|NO|INV)\s*//i                   && return('NOT',  $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(AND|Y)\s*//i                        && return('AND',  $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(\+)\s*//i                           && return('PLUS', $1);
 
-		# Registers ==============================================================
-		s/^(ALU)\s*//i                            && return('ALU',       $1);
-		s/^(MAR)\s*//i                            && return('MAR',       $1);
-		s/^(MBR)\s*//i                            && return('MBR',       $1);
+			# Brackets ===============================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^([\(])\s*//    && return('PLEFT',   $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^([\)])\s*//    && return('PRIGHT',  $1);
 
-		s/^(AC)\s*//i                             && return('AC',         1);
-		s/^(SP)\s*//i                             && return('SP',         2);
-		s/^(IR)\s*//i                             && return('IR',         3);
-		s/^(TIR)\s*//i                            && return('TIR',        4);
-		s/^(0)\s*//i                              && return('ZERO',       5);
-		s/^(1)\s*//i                              && return('ONE',        6);
-		s/^(\-1)\s*//i                            && return('_ONE',       7);
-		s/^(AMASK)\s*//i                          && return('AMASK',      8);
-		s/^(SMASK)\s*//i                          && return('SMASK',      9);
-		s/^(A)\s*//i                              && return('A',         10);
-		s/^(B)\s*//i                              && return('B',         11);
-		s/^(C)\s*//i                              && return('C',         12);
-		s/^(D)\s*//i                              && return('D',         13);
-		s/^(E)\s*//i                              && return('E',         14);
-		s/^(F)\s*//i                              && return('F',         15);
+			# Registers ==============================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(ALU)\s*//i    && return('ALU',     $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(MAR)\s*//i    && return('MAR',     $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(MBR)\s*//i    && return('MBR',     $1);
 
-		# Comments ===============================================================
-		s/^[\{]\s*(.*?)[\}]//                     && return('COMMENT',   $1);
-		s/^\#\s*(.*)$//i                          && return('COMMENT',   $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(AC)\s*//i     && return('AC',       1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(SP)\s*//i     && return('SP',       2);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(IR)\s*//i     && return('IR',       3);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(TIR)\s*//i    && return('TIR',      4);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(0)\s*//i      && return('ZERO',     5);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(1)\s*//i      && return('ONE',      6);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(\-1)\s*//i    && return('_ONE',     7);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(AMASK)\s*//i  && return('AMASK',    8);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(SMASK)\s*//i  && return('SMASK',    9);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(A)\s*//i      && return('A',       10);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(B)\s*//i      && return('B',       11);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(C)\s*//i      && return('C',       12);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(D)\s*//i      && return('D',       13);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(E)\s*//i      && return('E',       14);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^(F)\s*//i      && return('F',       15);
 
-		# If could not recognize a token and there is still something to read
-		# there is an error in the expression
-		$self -> _add_error( $_ERR_UNRECOGNISED_EXPRESION, $_) if $_;
+			# Comments ===============================================================
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^[\{]\s*(.*?)[\}]//  && return('COMMENT', $1);
+			$self -> YYData -> {'INPUT_LINE'} =~ s/^\#\s*(.*)$//i       && return('COMMENT', $1);
 
-		# As mentioned in the Parse::Yacc help
-		# we should return ('', undef) at the end
-		return('', undef);
+			# If could not recognize a token and there is still something to read
+			# there is an error in the expression
+			$self -> _add_error( $_ERR_UNRECOGNISED_EXPRESION, $_) if $self -> YYData -> {'INPUT_LINE'};
 
-	} # for
+			# As mentioned in the Parse::Yacc help
+			# we should return ('', undef) at the end
+			return('', undef);
+
+		}
+	} while ( $self -> YYData -> {'INPUT_LINE'} = <$io_handle> );
 
 	# EOF
 	return('', undef);
@@ -407,7 +411,7 @@ sub _error {
 	my $input = $self -> YYData -> {INPUT} || $value;
 
 	# list of expected tokens
-	my $expected = join("' o '", grep(!/error/, $self -> YYExpect));
+	my $expected = join "' o '", grep { !/error/ } $self -> YYExpect;
 
 	$self -> _add_error( $_ERR_WRONG_SYNTAX, ($input || $_ERR_END_OF_INPUT) );
 	$self -> _add_error( $_ERR_TOKEN_EXPECTED, $expected );
@@ -510,4 +514,6 @@ This software is provided "as-is," without any express or implied warranty. In n
 L<Parse::Yapp>
 
 =cut
+
+1;
 
