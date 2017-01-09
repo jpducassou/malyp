@@ -23,7 +23,7 @@ By default, the processed output is printed to STDOUT.
 
 # SOURCE
 
-https://github.com/jpducassou/perl-cpu\_mic1\_microassembler
+[https://github.com/jpducassou/perl-cpu_mic1_microassembler](https://github.com/jpducassou/perl-cpu_mic1_microassembler)
 
 # AUTHOR
 
@@ -44,3 +44,4 @@ This software is provided "as-is," without any express or implied warranty. In n
 # SEE ALSO
 
 [Parse::Yapp](https://metacpan.org/pod/Parse::Yapp)
+
